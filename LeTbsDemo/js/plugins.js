@@ -37,5 +37,6 @@ var $plugins =
 {"name":"-------------------------","status":true,"description":"","parameters":{}},
 {"name":"LeTBS_YanflyPatch","status":true,"description":"Fix compatibility issues with Yanfly's plugins","parameters":{}},
 {"name":"LeDamageFormula","status":true,"description":"Adds balanced damage formula","parameters":{}},
-{"name":"LeDragAndMoveWindows","status":true,"description":"Allows the user to drag and move windows","parameters":{"Sound When dragged":"Cursor2,50,90,0","Max Windows":"1","Grid Size":"12","Draggable Windows":"Window_TitleCommand"}}
+{"name":"LeDragAndMoveWindows","status":true,"description":"Allows the user to drag and move windows","parameters":{"Sound When dragged":"Cursor2,50,90,0","Max Windows":"1","Grid Size":"12","Draggable Windows":"Window_TitleCommand"}},
+{"name":"YEP_ItemCore","status":true,"description":"v1.28 Changes the way Items are handled for your game\nand the Item Scene, too.","parameters":{"---General---":"","Max Items":"0","Max Weapons":"100","Max Armors":"100","Starting ID":"3000","Random Variance":"0","Negative Variance":"false","Name Format":"%1%2%3%4","Name Spacing":"true","Boost Format":"(+%1)","---Item Scene---":"","Updated Scene Item":"true","List Equipped Items":"true","Show Icon":"true","Icon Size":"128","Font Size":"20","Command Alignment":"center","Recovery Format":"%1 Heal","Add State":"+State","Add Buff":"+Buff","Remove State":"-State","Remove Buff":"-Buff","Maximum Icons":"4","Use Command":"Use %1","Carry Format":"%1/%2","--Independent Items--":"","Midgame Note Parsing":"false"}}
 ];
