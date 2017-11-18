@@ -222,6 +222,14 @@ Lecode.S_TBS.Config.Aura = {
         target_type: "enemy",
         states: [13],
         trigger_anim: 142
+    },
+    
+    "sleeping_aura": {
+        size: "circle(1)",
+        affect_caster: false,
+        target_type: "enemy",
+        states: [10],
+        trigger_anim: 142
     }
 
 };
