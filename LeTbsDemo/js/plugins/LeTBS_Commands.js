@@ -88,7 +88,7 @@ Lecode.S_TBS.Commands.previewActionScopes = String(parameters["Preview Action Sc
 * TBSEntity
 -------------------------------------------------------------------------*/
 TBSEntity.prototype.getCommandsString = function () {
-    var value = this.rpgObject().leTbs_commands;
+    var value = "move, [extra], pass";//this.rpgObject().leTbs_commands;
     var extra = "";
     this.battler().states().forEach(function (state) {
         if (state) {
@@ -101,7 +101,23 @@ TBSEntity.prototype.getCommandsString = function () {
                 extra += " " + equip.leTbs_commands;
             }
         });
+        // REQUIRES YEP_EquipBattleSkills.js
+        // Push YEP's equipped skills into [extra]
+        var equippedskills = "";
+        this.battler().battleSkillsRaw().forEach(function (id) {
+            if (id){
+                equippedskills += ' skill[' + id + ']';
+            }
+        });
+        // Deletes first comma in the list
+        //if (equippedskills.substring(0,1) == ','){
+        //    equippedskills = equippedskills.substring(1); 
+        //}
+        extra += equippedskills;
+        // REQUIRES YEP_EquipBattleSkills.js
+        
     }
+    console.log(value.replace("[extra]", extra));
     return value.replace("[extra]", extra);
 };
 
