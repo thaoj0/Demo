@@ -519,6 +519,18 @@ Window_TBSStatus.prototype.gaugeHeight = function () {
 /*-------------------------------------------------------------------------
 * Window_TBSSkillList
 -------------------------------------------------------------------------*/
+// This requires YEP_EquipBattleSkills.js
+Window_SkillList.prototype.makeItemList = function() {
+    if (this._actor) {
+        this._data = this._actor.battleSkills().filter(function(item) {
+            return this.includes(item);
+        }, this);
+    } else {
+        this._data = [];
+    }
+};
+// This requires YEP_EquipBattleSkills.js
+
 function Window_TBSSkillList() {
     this.initialize.apply(this, arguments);
 }
