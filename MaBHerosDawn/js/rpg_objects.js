@@ -1,5 +1,5 @@
 //=============================================================================
-// rpg_objects.js v1.3.4
+// rpg_objects.js v1.5.1
 //=============================================================================
 
 //-----------------------------------------------------------------------------
@@ -271,6 +271,10 @@ Game_System.prototype.replayWalkingBgm = function() {
     }
 };
 
+Game_System.prototype.saveWalkingBgm2 = function() {
+	this._walkingBgm = $dataMap.bgm;
+};
+
 //-----------------------------------------------------------------------------
 // Game_Timer
 //
@@ -490,7 +494,7 @@ Game_Message.prototype.isItemChoice = function() {
 
 Game_Message.prototype.isBusy = function() {
     return (this.hasText() || this.isChoice() ||
-        this.isNumberInput() || this.isItemChoice());
+            this.isNumberInput() || this.isItemChoice());
 };
 
 Game_Message.prototype.newPage = function() {
@@ -500,9 +504,7 @@ Game_Message.prototype.newPage = function() {
 };
 
 Game_Message.prototype.allText = function() {
-    return this._texts.reduce(function(previousValue, currentValue) {
-        return previousValue + '\n' + currentValue;
-    });
+    return this._texts.join('\n');
 };
 
 //-----------------------------------------------------------------------------
@@ -848,7 +850,7 @@ Game_Screen.prototype.updateShake = function() {
         if (this._shake > this._shakePower * 2) {
             this._shakeDirection = -1;
         }
-        if (this._shake < -this._shakePower * 2) {
+        if (this._shake < - this._shakePower * 2) {
             this._shakeDirection = 1;
         }
         this._shakeDuration--;
@@ -889,7 +891,7 @@ Game_Screen.prototype.startFlashForDamage = function() {
 };
 
 Game_Screen.prototype.showPicture = function(pictureId, name, origin, x, y,
-    scaleX, scaleY, opacity, blendMode) {
+                                             scaleX, scaleY, opacity, blendMode) {
     var realPictureId = this.realPictureId(pictureId);
     var picture = new Game_Picture();
     picture.show(name, origin, x, y, scaleX, scaleY, opacity, blendMode);
@@ -897,7 +899,7 @@ Game_Screen.prototype.showPicture = function(pictureId, name, origin, x, y,
 };
 
 Game_Screen.prototype.movePicture = function(pictureId, origin, x, y, scaleX,
-    scaleY, opacity, blendMode, duration) {
+                                             scaleY, opacity, blendMode, duration) {
     var picture = this.picture(pictureId);
     if (picture) {
         picture.move(origin, x, y, scaleX, scaleY, opacity, blendMode, duration);
@@ -1011,7 +1013,7 @@ Game_Picture.prototype.initRotation = function() {
 };
 
 Game_Picture.prototype.show = function(name, origin, x, y, scaleX,
-    scaleY, opacity, blendMode) {
+                                       scaleY, opacity, blendMode) {
     this._name = name;
     this._origin = origin;
     this._x = x;
@@ -1026,7 +1028,7 @@ Game_Picture.prototype.show = function(name, origin, x, y, scaleX,
 };
 
 Game_Picture.prototype.move = function(origin, x, y, scaleX, scaleY,
-    opacity, blendMode, duration) {
+                                       opacity, blendMode, duration) {
     this._origin = origin;
     this._targetX = x;
     this._targetY = y;
@@ -1071,8 +1073,8 @@ Game_Picture.prototype.updateMove = function() {
         var d = this._duration;
         this._x = (this._x * (d - 1) + this._targetX) / d;
         this._y = (this._y * (d - 1) + this._targetY) / d;
-        this._scaleX = (this._scaleX * (d - 1) + this._targetScaleX) / d;
-        this._scaleY = (this._scaleY * (d - 1) + this._targetScaleY) / d;
+        this._scaleX  = (this._scaleX  * (d - 1) + this._targetScaleX)  / d;
+        this._scaleY  = (this._scaleY  * (d - 1) + this._targetScaleY)  / d;
         this._opacity = (this._opacity * (d - 1) + this._targetOpacity) / d;
         this._duration--;
     }
@@ -1187,23 +1189,23 @@ function Game_Action() {
     this.initialize.apply(this, arguments);
 }
 
-Game_Action.EFFECT_RECOVER_HP = 11;
-Game_Action.EFFECT_RECOVER_MP = 12;
-Game_Action.EFFECT_GAIN_TP = 13;
-Game_Action.EFFECT_ADD_STATE = 21;
-Game_Action.EFFECT_REMOVE_STATE = 22;
-Game_Action.EFFECT_ADD_BUFF = 31;
-Game_Action.EFFECT_ADD_DEBUFF = 32;
-Game_Action.EFFECT_REMOVE_BUFF = 33;
-Game_Action.EFFECT_REMOVE_DEBUFF = 34;
-Game_Action.EFFECT_SPECIAL = 41;
-Game_Action.EFFECT_GROW = 42;
-Game_Action.EFFECT_LEARN_SKILL = 43;
-Game_Action.EFFECT_COMMON_EVENT = 44;
-Game_Action.SPECIAL_EFFECT_ESCAPE = 0;
-Game_Action.HITTYPE_CERTAIN = 0;
-Game_Action.HITTYPE_PHYSICAL = 1;
-Game_Action.HITTYPE_MAGICAL = 2;
+Game_Action.EFFECT_RECOVER_HP       = 11;
+Game_Action.EFFECT_RECOVER_MP       = 12;
+Game_Action.EFFECT_GAIN_TP          = 13;
+Game_Action.EFFECT_ADD_STATE        = 21;
+Game_Action.EFFECT_REMOVE_STATE     = 22;
+Game_Action.EFFECT_ADD_BUFF         = 31;
+Game_Action.EFFECT_ADD_DEBUFF       = 32;
+Game_Action.EFFECT_REMOVE_BUFF      = 33;
+Game_Action.EFFECT_REMOVE_DEBUFF    = 34;
+Game_Action.EFFECT_SPECIAL          = 41;
+Game_Action.EFFECT_GROW             = 42;
+Game_Action.EFFECT_LEARN_SKILL      = 43;
+Game_Action.EFFECT_COMMON_EVENT     = 44;
+Game_Action.SPECIAL_EFFECT_ESCAPE   = 0;
+Game_Action.HITTYPE_CERTAIN         = 0;
+Game_Action.HITTYPE_PHYSICAL        = 1;
+Game_Action.HITTYPE_MAGICAL         = 2;
 
 Game_Action.prototype.initialize = function(subject, forcing) {
     this._subjectActorId = 0;
@@ -1466,15 +1468,15 @@ Game_Action.prototype.repeatTargets = function(targets) {
 
 Game_Action.prototype.confusionTarget = function() {
     switch (this.subject().confusionLevel()) {
-        case 1:
+    case 1:
+        return this.opponentsUnit().randomTarget();
+    case 2:
+        if (Math.randomInt(2) === 0) {
             return this.opponentsUnit().randomTarget();
-        case 2:
-            if (Math.randomInt(2) === 0) {
-                return this.opponentsUnit().randomTarget();
-            }
-            return this.friendsUnit().randomTarget();
-        default:
-            return this.friendsUnit().randomTarget();
+        }
+        return this.friendsUnit().randomTarget();
+    default:
+        return this.friendsUnit().randomTarget();
     }
 };
 
@@ -1566,7 +1568,7 @@ Game_Action.prototype.evaluateWithTarget = function(target) {
 
 Game_Action.prototype.testApply = function(target) {
     return (this.isForDeadFriend() === target.isDead() &&
-        ($gameParty.inBattle() || this.isForOpponent() ||
+            ($gameParty.inBattle() || this.isForOpponent() ||
             (this.isHpRecover() && target.hp < target.mhp) ||
             (this.isMpRecover() && target.mp < target.mmp) ||
             (this.hasItemAnyValidEffects(target))));
@@ -1580,26 +1582,26 @@ Game_Action.prototype.hasItemAnyValidEffects = function(target) {
 
 Game_Action.prototype.testItemEffect = function(target, effect) {
     switch (effect.code) {
-        case Game_Action.EFFECT_RECOVER_HP:
-            return target.hp < target.mhp || effect.value1 < 0 || effect.value2 < 0;
-        case Game_Action.EFFECT_RECOVER_MP:
-            return target.mp < target.mmp || effect.value1 < 0 || effect.value2 < 0;
-        case Game_Action.EFFECT_ADD_STATE:
-            return !target.isStateAffected(effect.dataId);
-        case Game_Action.EFFECT_REMOVE_STATE:
-            return target.isStateAffected(effect.dataId);
-        case Game_Action.EFFECT_ADD_BUFF:
-            return !target.isMaxBuffAffected(effect.dataId);
-        case Game_Action.EFFECT_ADD_DEBUFF:
-            return !target.isMaxDebuffAffected(effect.dataId);
-        case Game_Action.EFFECT_REMOVE_BUFF:
-            return target.isBuffAffected(effect.dataId);
-        case Game_Action.EFFECT_REMOVE_DEBUFF:
-            return target.isDebuffAffected(effect.dataId);
-        case Game_Action.EFFECT_LEARN_SKILL:
-            return target.isActor() && !target.isLearnedSkill(effect.dataId);
-        default:
-            return true;
+    case Game_Action.EFFECT_RECOVER_HP:
+        return target.hp < target.mhp || effect.value1 < 0 || effect.value2 < 0;
+    case Game_Action.EFFECT_RECOVER_MP:
+        return target.mp < target.mmp || effect.value1 < 0 || effect.value2 < 0;
+    case Game_Action.EFFECT_ADD_STATE:
+        return !target.isStateAffected(effect.dataId);
+    case Game_Action.EFFECT_REMOVE_STATE:
+        return target.isStateAffected(effect.dataId);
+    case Game_Action.EFFECT_ADD_BUFF:
+        return !target.isMaxBuffAffected(effect.dataId);
+    case Game_Action.EFFECT_ADD_DEBUFF:
+        return !target.isMaxDebuffAffected(effect.dataId);
+    case Game_Action.EFFECT_REMOVE_BUFF:
+        return target.isBuffAffected(effect.dataId);
+    case Game_Action.EFFECT_REMOVE_DEBUFF:
+        return target.isDebuffAffected(effect.dataId);
+    case Game_Action.EFFECT_LEARN_SKILL:
+        return target.isActor() && !target.isLearnedSkill(effect.dataId);
+    default:
+        return true;
     }
 };
 
@@ -1693,8 +1695,8 @@ Game_Action.prototype.evalDamageFormula = function(target) {
         var v = $gameVariables._data;
         var sign = ([3, 4].contains(item.damage.type) ? -1 : 1);
         var value = Math.max(eval(item.damage.formula), 0) * sign;
-        if (isNaN(value)) value = 0;
-        return value;
+		if (isNaN(value)) value = 0;
+		return value;
     } catch (e) {
         return 0;
     }
@@ -1770,65 +1772,65 @@ Game_Action.prototype.executeMpDamage = function(target, value) {
 
 Game_Action.prototype.gainDrainedHp = function(value) {
     if (this.isDrain()) {
-        var gainTarget = this.subject();
-        if (this._reflectionTarget !== undefined) {
+       var gainTarget = this.subject();
+       if (this._reflectionTarget !== undefined) {
             gainTarget = this._reflectionTarget;
         }
-        gainTarget.gainHp(value);
+       gainTarget.gainHp(value);
     }
 };
 
 Game_Action.prototype.gainDrainedMp = function(value) {
     if (this.isDrain()) {
-        var gainTarget = this.subject();
-        if (this._reflectionTarget !== undefined) {
-            gainTarget = this._reflectionTarget;
-        }
-        gainTarget.gainMp(value);
+       var gainTarget = this.subject();
+       if (this._reflectionTarget !== undefined) {
+           gainTarget = this._reflectionTarget;
+       }
+       gainTarget.gainMp(value);
     }
 };
 
 Game_Action.prototype.applyItemEffect = function(target, effect) {
     switch (effect.code) {
-        case Game_Action.EFFECT_RECOVER_HP:
-            this.itemEffectRecoverHp(target, effect);
-            break;
-        case Game_Action.EFFECT_RECOVER_MP:
-            this.itemEffectRecoverMp(target, effect);
-            break;
-        case Game_Action.EFFECT_GAIN_TP:
-            this.itemEffectGainTp(target, effect);
-            break;
-        case Game_Action.EFFECT_ADD_STATE:
-            this.itemEffectAddState(target, effect);
-            break;
-        case Game_Action.EFFECT_REMOVE_STATE:
-            this.itemEffectRemoveState(target, effect);
-            break;
-        case Game_Action.EFFECT_ADD_BUFF:
-            this.itemEffectAddBuff(target, effect);
-            break;
-        case Game_Action.EFFECT_ADD_DEBUFF:
-            this.itemEffectAddDebuff(target, effect);
-            break;
-        case Game_Action.EFFECT_REMOVE_BUFF:
-            this.itemEffectRemoveBuff(target, effect);
-            break;
-        case Game_Action.EFFECT_REMOVE_DEBUFF:
-            this.itemEffectRemoveDebuff(target, effect);
-            break;
-        case Game_Action.EFFECT_SPECIAL:
-            this.itemEffectSpecial(target, effect);
-            break;
-        case Game_Action.EFFECT_GROW:
-            this.itemEffectGrow(target, effect);
-            break;
-        case Game_Action.EFFECT_LEARN_SKILL:
-            this.itemEffectLearnSkill(target, effect);
-            break;
-        case Game_Action.EFFECT_COMMON_EVENT:
-            this.itemEffectCommonEvent(target, effect);
-            break;
+    case Game_Action.EFFECT_RECOVER_HP:
+        this.itemEffectRecoverHp(target, effect);
+        break;
+    case Game_Action.EFFECT_RECOVER_MP:
+        this.itemEffectRecoverMp(target, effect);
+        break;
+    case Game_Action.EFFECT_GAIN_TP:
+        this.itemEffectGainTp(target, effect);
+        break;
+    case Game_Action.EFFECT_ADD_STATE:
+        this.itemEffectAddState(target, effect);
+        break;
+    case Game_Action.EFFECT_REMOVE_STATE:
+        this.itemEffectRemoveState(target, effect);
+        break;
+    case Game_Action.EFFECT_ADD_BUFF:
+        this.itemEffectAddBuff(target, effect);
+        break;
+    case Game_Action.EFFECT_ADD_DEBUFF:
+        this.itemEffectAddDebuff(target, effect);
+        break;
+    case Game_Action.EFFECT_REMOVE_BUFF:
+        this.itemEffectRemoveBuff(target, effect);
+        break;
+    case Game_Action.EFFECT_REMOVE_DEBUFF:
+        this.itemEffectRemoveDebuff(target, effect);
+        break;
+    case Game_Action.EFFECT_SPECIAL:
+        this.itemEffectSpecial(target, effect);
+        break;
+    case Game_Action.EFFECT_GROW:
+        this.itemEffectGrow(target, effect);
+        break;
+    case Game_Action.EFFECT_LEARN_SKILL:
+        this.itemEffectLearnSkill(target, effect);
+        break;
+    case Game_Action.EFFECT_COMMON_EVENT:
+        this.itemEffectCommonEvent(target, effect);
+        break;
     }
 };
 
@@ -1951,7 +1953,8 @@ Game_Action.prototype.itemEffectLearnSkill = function(target, effect) {
     }
 };
 
-Game_Action.prototype.itemEffectCommonEvent = function(target, effect) {};
+Game_Action.prototype.itemEffectCommonEvent = function(target, effect) {
+};
 
 Game_Action.prototype.makeSuccess = function(target) {
     target.result().success = true;
@@ -2021,8 +2024,8 @@ Game_ActionResult.prototype.removedStateObjects = function() {
 
 Game_ActionResult.prototype.isStatusAffected = function() {
     return (this.addedStates.length > 0 || this.removedStates.length > 0 ||
-        this.addedBuffs.length > 0 || this.addedDebuffs.length > 0 ||
-        this.removedBuffs.length > 0);
+            this.addedBuffs.length > 0 || this.addedDebuffs.length > 0 ||
+            this.removedBuffs.length > 0);
 };
 
 Game_ActionResult.prototype.isHit = function() {
@@ -2088,255 +2091,100 @@ function Game_BattlerBase() {
     this.initialize.apply(this, arguments);
 }
 
-Game_BattlerBase.TRAIT_ELEMENT_RATE = 11;
-Game_BattlerBase.TRAIT_DEBUFF_RATE = 12;
-Game_BattlerBase.TRAIT_STATE_RATE = 13;
-Game_BattlerBase.TRAIT_STATE_RESIST = 14;
-Game_BattlerBase.TRAIT_PARAM = 21;
-Game_BattlerBase.TRAIT_XPARAM = 22;
-Game_BattlerBase.TRAIT_SPARAM = 23;
+Game_BattlerBase.TRAIT_ELEMENT_RATE   = 11;
+Game_BattlerBase.TRAIT_DEBUFF_RATE    = 12;
+Game_BattlerBase.TRAIT_STATE_RATE     = 13;
+Game_BattlerBase.TRAIT_STATE_RESIST   = 14;
+Game_BattlerBase.TRAIT_PARAM          = 21;
+Game_BattlerBase.TRAIT_XPARAM         = 22;
+Game_BattlerBase.TRAIT_SPARAM         = 23;
 Game_BattlerBase.TRAIT_ATTACK_ELEMENT = 31;
-Game_BattlerBase.TRAIT_ATTACK_STATE = 32;
-Game_BattlerBase.TRAIT_ATTACK_SPEED = 33;
-Game_BattlerBase.TRAIT_ATTACK_TIMES = 34;
-Game_BattlerBase.TRAIT_STYPE_ADD = 41;
-Game_BattlerBase.TRAIT_STYPE_SEAL = 42;
-Game_BattlerBase.TRAIT_SKILL_ADD = 43;
-Game_BattlerBase.TRAIT_SKILL_SEAL = 44;
-Game_BattlerBase.TRAIT_EQUIP_WTYPE = 51;
-Game_BattlerBase.TRAIT_EQUIP_ATYPE = 52;
-Game_BattlerBase.TRAIT_EQUIP_LOCK = 53;
-Game_BattlerBase.TRAIT_EQUIP_SEAL = 54;
-Game_BattlerBase.TRAIT_SLOT_TYPE = 55;
-Game_BattlerBase.TRAIT_ACTION_PLUS = 61;
-Game_BattlerBase.TRAIT_SPECIAL_FLAG = 62;
-Game_BattlerBase.TRAIT_COLLAPSE_TYPE = 63;
-Game_BattlerBase.TRAIT_PARTY_ABILITY = 64;
-Game_BattlerBase.FLAG_ID_AUTO_BATTLE = 0;
-Game_BattlerBase.FLAG_ID_GUARD = 1;
-Game_BattlerBase.FLAG_ID_SUBSTITUTE = 2;
-Game_BattlerBase.FLAG_ID_PRESERVE_TP = 3;
-Game_BattlerBase.ICON_BUFF_START = 32;
-Game_BattlerBase.ICON_DEBUFF_START = 48;
+Game_BattlerBase.TRAIT_ATTACK_STATE   = 32;
+Game_BattlerBase.TRAIT_ATTACK_SPEED   = 33;
+Game_BattlerBase.TRAIT_ATTACK_TIMES   = 34;
+Game_BattlerBase.TRAIT_STYPE_ADD      = 41;
+Game_BattlerBase.TRAIT_STYPE_SEAL     = 42;
+Game_BattlerBase.TRAIT_SKILL_ADD      = 43;
+Game_BattlerBase.TRAIT_SKILL_SEAL     = 44;
+Game_BattlerBase.TRAIT_EQUIP_WTYPE    = 51;
+Game_BattlerBase.TRAIT_EQUIP_ATYPE    = 52;
+Game_BattlerBase.TRAIT_EQUIP_LOCK     = 53;
+Game_BattlerBase.TRAIT_EQUIP_SEAL     = 54;
+Game_BattlerBase.TRAIT_SLOT_TYPE      = 55;
+Game_BattlerBase.TRAIT_ACTION_PLUS    = 61;
+Game_BattlerBase.TRAIT_SPECIAL_FLAG   = 62;
+Game_BattlerBase.TRAIT_COLLAPSE_TYPE  = 63;
+Game_BattlerBase.TRAIT_PARTY_ABILITY  = 64;
+Game_BattlerBase.FLAG_ID_AUTO_BATTLE  = 0;
+Game_BattlerBase.FLAG_ID_GUARD        = 1;
+Game_BattlerBase.FLAG_ID_SUBSTITUTE   = 2;
+Game_BattlerBase.FLAG_ID_PRESERVE_TP  = 3;
+Game_BattlerBase.ICON_BUFF_START      = 32;
+Game_BattlerBase.ICON_DEBUFF_START    = 48;
 
 Object.defineProperties(Game_BattlerBase.prototype, {
     // Hit Points
-    hp: {
-        get: function() {
-            return this._hp;
-        },
-        configurable: true
-    },
+    hp: { get: function() { return this._hp; }, configurable: true },
     // Magic Points
-    mp: {
-        get: function() {
-            return this._mp;
-        },
-        configurable: true
-    },
+    mp: { get: function() { return this._mp; }, configurable: true },
     // Tactical Points
-    tp: {
-        get: function() {
-            return this._tp;
-        },
-        configurable: true
-    },
+    tp: { get: function() { return this._tp; }, configurable: true },
     // Maximum Hit Points
-    mhp: {
-        get: function() {
-            return this.param(0);
-        },
-        configurable: true
-    },
+    mhp: { get: function() { return this.param(0); }, configurable: true },
     // Maximum Magic Points
-    mmp: {
-        get: function() {
-            return this.param(1);
-        },
-        configurable: true
-    },
+    mmp: { get: function() { return this.param(1); }, configurable: true },
     // ATtacK power
-    atk: {
-        get: function() {
-            return this.param(2);
-        },
-        configurable: true
-    },
+    atk: { get: function() { return this.param(2); }, configurable: true },
     // DEFense power
-    def: {
-        get: function() {
-            return this.param(3);
-        },
-        configurable: true
-    },
+    def: { get: function() { return this.param(3); }, configurable: true },
     // Magic ATtack power
-    mat: {
-        get: function() {
-            return this.param(4);
-        },
-        configurable: true
-    },
+    mat: { get: function() { return this.param(4); }, configurable: true },
     // Magic DeFense power
-    mdf: {
-        get: function() {
-            return this.param(5);
-        },
-        configurable: true
-    },
+    mdf: { get: function() { return this.param(5); }, configurable: true },
     // AGIlity
-    agi: {
-        get: function() {
-            return this.param(6);
-        },
-        configurable: true
-    },
+    agi: { get: function() { return this.param(6); }, configurable: true },
     // LUcK
-    luk: {
-        get: function() {
-            return this.param(7);
-        },
-        configurable: true
-    },
+    luk: { get: function() { return this.param(7); }, configurable: true },
     // HIT rate
-    hit: {
-        get: function() {
-            return this.xparam(0);
-        },
-        configurable: true
-    },
+    hit: { get: function() { return this.xparam(0); }, configurable: true },
     // EVAsion rate
-    eva: {
-        get: function() {
-            return this.xparam(1);
-        },
-        configurable: true
-    },
+    eva: { get: function() { return this.xparam(1); }, configurable: true },
     // CRItical rate
-    cri: {
-        get: function() {
-            return this.xparam(2);
-        },
-        configurable: true
-    },
+    cri: { get: function() { return this.xparam(2); }, configurable: true },
     // Critical EVasion rate
-    cev: {
-        get: function() {
-            return this.xparam(3);
-        },
-        configurable: true
-    },
+    cev: { get: function() { return this.xparam(3); }, configurable: true },
     // Magic EVasion rate
-    mev: {
-        get: function() {
-            return this.xparam(4);
-        },
-        configurable: true
-    },
+    mev: { get: function() { return this.xparam(4); }, configurable: true },
     // Magic ReFlection rate
-    mrf: {
-        get: function() {
-            return this.xparam(5);
-        },
-        configurable: true
-    },
+    mrf: { get: function() { return this.xparam(5); }, configurable: true },
     // CouNTer attack rate
-    cnt: {
-        get: function() {
-            return this.xparam(6);
-        },
-        configurable: true
-    },
+    cnt: { get: function() { return this.xparam(6); }, configurable: true },
     // Hp ReGeneration rate
-    hrg: {
-        get: function() {
-            return this.xparam(7);
-        },
-        configurable: true
-    },
+    hrg: { get: function() { return this.xparam(7); }, configurable: true },
     // Mp ReGeneration rate
-    mrg: {
-        get: function() {
-            return this.xparam(8);
-        },
-        configurable: true
-    },
+    mrg: { get: function() { return this.xparam(8); }, configurable: true },
     // Tp ReGeneration rate
-    trg: {
-        get: function() {
-            return this.xparam(9);
-        },
-        configurable: true
-    },
+    trg: { get: function() { return this.xparam(9); }, configurable: true },
     // TarGet Rate
-    tgr: {
-        get: function() {
-            return this.sparam(0);
-        },
-        configurable: true
-    },
+    tgr: { get: function() { return this.sparam(0); }, configurable: true },
     // GuaRD effect rate
-    grd: {
-        get: function() {
-            return this.sparam(1);
-        },
-        configurable: true
-    },
+    grd: { get: function() { return this.sparam(1); }, configurable: true },
     // RECovery effect rate
-    rec: {
-        get: function() {
-            return this.sparam(2);
-        },
-        configurable: true
-    },
+    rec: { get: function() { return this.sparam(2); }, configurable: true },
     // PHArmacology
-    pha: {
-        get: function() {
-            return this.sparam(3);
-        },
-        configurable: true
-    },
+    pha: { get: function() { return this.sparam(3); }, configurable: true },
     // Mp Cost Rate
-    mcr: {
-        get: function() {
-            return this.sparam(4);
-        },
-        configurable: true
-    },
+    mcr: { get: function() { return this.sparam(4); }, configurable: true },
     // Tp Charge Rate
-    tcr: {
-        get: function() {
-            return this.sparam(5);
-        },
-        configurable: true
-    },
+    tcr: { get: function() { return this.sparam(5); }, configurable: true },
     // Physical Damage Rate
-    pdr: {
-        get: function() {
-            return this.sparam(6);
-        },
-        configurable: true
-    },
+    pdr: { get: function() { return this.sparam(6); }, configurable: true },
     // Magical Damage Rate
-    mdr: {
-        get: function() {
-            return this.sparam(7);
-        },
-        configurable: true
-    },
+    mdr: { get: function() { return this.sparam(7); }, configurable: true },
     // Floor Damage Rate
-    fdr: {
-        get: function() {
-            return this.sparam(8);
-        },
-        configurable: true
-    },
+    fdr: { get: function() { return this.sparam(8); }, configurable: true },
     // EXperience Rate
-    exr: {
-        get: function() {
-            return this.sparam(9);
-        },
-        configurable: true
-    }
+    exr: { get: function() { return this.sparam(9); }, configurable: true }
 });
 
 Game_BattlerBase.prototype.initialize = function() {
@@ -2354,7 +2202,7 @@ Game_BattlerBase.prototype.initMembers = function() {
 };
 
 Game_BattlerBase.prototype.clearParamPlus = function() {
-    this._paramPlus = [0, 0, 0, 0, 0, 0, 0, 0];
+    this._paramPlus = [0,0,0,0,0,0,0,0];
 };
 
 Game_BattlerBase.prototype.clearStates = function() {
@@ -2401,8 +2249,8 @@ Game_BattlerBase.prototype.updateStateTurns = function() {
 };
 
 Game_BattlerBase.prototype.clearBuffs = function() {
-    this._buffs = [0, 0, 0, 0, 0, 0, 0, 0];
-    this._buffTurns = [0, 0, 0, 0, 0, 0, 0, 0];
+    this._buffs = [0,0,0,0,0,0,0,0];
+    this._buffTurns = [0,0,0,0,0,0,0,0];
 };
 
 Game_BattlerBase.prototype.eraseBuff = function(paramId) {
@@ -2575,7 +2423,7 @@ Game_BattlerBase.prototype.paramPlus = function(paramId) {
 
 Game_BattlerBase.prototype.paramMin = function(paramId) {
     if (paramId === 1) {
-        return 0; // MMP
+        return 0;   // MMP
     } else {
         return 1;
     }
@@ -2583,9 +2431,9 @@ Game_BattlerBase.prototype.paramMin = function(paramId) {
 
 Game_BattlerBase.prototype.paramMax = function(paramId) {
     if (paramId === 0) {
-        return 999999; // MHP
+        return 999999;  // MHP
     } else if (paramId === 1) {
-        return 9999; // MMP
+        return 9999;    // MMP
     } else {
         return 999;
     }
@@ -2871,7 +2719,8 @@ Game_BattlerBase.prototype.addNewState = function(stateId) {
     }
 };
 
-Game_BattlerBase.prototype.onRestrict = function() {};
+Game_BattlerBase.prototype.onRestrict = function() {
+};
 
 Game_BattlerBase.prototype.mostImportantStateText = function() {
     var states = this.states();
@@ -2936,8 +2785,8 @@ Game_BattlerBase.prototype.meetsUsableItemConditions = function(item) {
 
 Game_BattlerBase.prototype.meetsSkillConditions = function(skill) {
     return (this.meetsUsableItemConditions(skill) &&
-        this.isSkillWtypeOk(skill) && this.canPaySkillCost(skill) &&
-        !this.isSkillSealed(skill.id) && !this.isSkillTypeSealed(skill.stypeId));
+            this.isSkillWtypeOk(skill) && this.canPaySkillCost(skill) &&
+            !this.isSkillSealed(skill.id) && !this.isSkillTypeSealed(skill.stypeId));
 };
 
 Game_BattlerBase.prototype.meetsItemConditions = function(item) {
@@ -3111,11 +2960,7 @@ Game_Battler.prototype.shiftAnimation = function() {
 };
 
 Game_Battler.prototype.startAnimation = function(animationId, mirror, delay) {
-    var data = {
-        animationId: animationId,
-        mirror: mirror,
-        delay: delay
-    };
+    var data = { animationId: animationId, mirror: mirror, delay: delay };
     this._animations.push(data);
 };
 
@@ -3173,9 +3018,9 @@ Game_Battler.prototype.addState = function(stateId) {
 
 Game_Battler.prototype.isStateAddable = function(stateId) {
     return (this.isAlive() && $dataStates[stateId] &&
-        !this.isStateResist(stateId) &&
-        !this._result.isStateRemoved(stateId) &&
-        !this.isStateRestrict(stateId));
+            !this.isStateResist(stateId) &&
+            !this._result.isStateRemoved(stateId) &&
+            !this.isStateRestrict(stateId));
 };
 
 Game_Battler.prototype.isStateRestrict = function(stateId) {
@@ -3431,8 +3276,10 @@ Game_Battler.prototype.onAllActionsEnd = function() {
 Game_Battler.prototype.onTurnEnd = function() {
     this.clearResult();
     this.regenerateAll();
-    this.updateStateTurns();
-    this.updateBuffTurns();
+    if (!BattleManager.isForcedTurn()) {
+        this.updateStateTurns();
+        this.updateBuffTurns();
+    }
     this.removeStatesAuto(2);
 };
 
@@ -3497,13 +3344,15 @@ Game_Battler.prototype.performActionStart = function(action) {
     }
 };
 
-Game_Battler.prototype.performAction = function(action) {};
+Game_Battler.prototype.performAction = function(action) {
+};
 
 Game_Battler.prototype.performActionEnd = function() {
     this.setActionState('done');
 };
 
-Game_Battler.prototype.performDamage = function() {};
+Game_Battler.prototype.performDamage = function() {
+};
 
 Game_Battler.prototype.performMiss = function() {
     SoundManager.playMiss();
@@ -3529,9 +3378,11 @@ Game_Battler.prototype.performReflection = function() {
     SoundManager.playReflection();
 };
 
-Game_Battler.prototype.performSubstitute = function(target) {};
+Game_Battler.prototype.performSubstitute = function(target) {
+};
 
-Game_Battler.prototype.performCollapse = function() {};
+Game_Battler.prototype.performCollapse = function() {
+};
 
 //-----------------------------------------------------------------------------
 // Game_Actor
@@ -3574,7 +3425,7 @@ Game_Actor.prototype.initMembers = function() {
     this._equips = [];
     this._actionInputIndex = 0;
     this._lastMenuSkill = new Game_Item();
-    this._lastBattleSkill = new Game_Item();
+    this._lastBattleSkill  = new Game_Item();
     this._lastCommandSymbol = '';
 };
 
@@ -3676,8 +3527,8 @@ Game_Actor.prototype.expForLevel = function(level) {
     var extra = c.expParams[1];
     var acc_a = c.expParams[2];
     var acc_b = c.expParams[3];
-    return Math.round(basis * (Math.pow(level - 1, 0.9 + acc_a / 250)) * level *
-        (level + 1) / (6 + Math.pow(level, 2) / 50 / acc_b) + (level - 1) * extra);
+    return Math.round(basis*(Math.pow(level-1, 0.9+acc_a/250))*level*
+            (level+1)/(6+Math.pow(level,2)/50/acc_b)+(level-1)*extra);
 };
 
 Game_Actor.prototype.initExp = function() {
@@ -3772,12 +3623,12 @@ Game_Actor.prototype.hasArmor = function(armor) {
 
 Game_Actor.prototype.isEquipChangeOk = function(slotId) {
     return (!this.isEquipTypeLocked(this.equipSlots()[slotId]) &&
-        !this.isEquipTypeSealed(this.equipSlots()[slotId]));
+            !this.isEquipTypeSealed(this.equipSlots()[slotId]));
 };
 
 Game_Actor.prototype.changeEquip = function(slotId, item) {
     if (this.tradeItemWithParty(item, this.equips()[slotId]) &&
-        (!item || this.equipSlots()[slotId] === item.etypeId)) {
+            (!item || this.equipSlots()[slotId] === item.etypeId)) {
         this._equips[slotId].setObject(item);
         this.refresh();
     }
@@ -3886,8 +3737,8 @@ Game_Actor.prototype.isSkillWtypeOk = function(skill) {
     var wtypeId1 = skill.requiredWtypeId1;
     var wtypeId2 = skill.requiredWtypeId2;
     if ((wtypeId1 === 0 && wtypeId2 === 0) ||
-        (wtypeId1 > 0 && this.isWtypeEquipped(wtypeId1)) ||
-        (wtypeId2 > 0 && this.isWtypeEquipped(wtypeId2))) {
+            (wtypeId1 > 0 && this.isWtypeEquipped(wtypeId1)) ||
+            (wtypeId2 > 0 && this.isWtypeEquipped(wtypeId2))) {
         return true;
     } else {
         return false;
@@ -3984,7 +3835,7 @@ Game_Actor.prototype.bareHandsElementId = function() {
 
 Game_Actor.prototype.paramMax = function(paramId) {
     if (paramId === 0) {
-        return 9999; // MHP
+        return 9999;    // MHP
     }
     return Game_Battler.prototype.paramMax.call(this, paramId);
 };
@@ -4424,7 +4275,7 @@ Game_Actor.prototype.meetsUsableItemConditions = function(item) {
     if ($gameParty.inBattle() && !BattleManager.canEscape() && this.testEscape(item)) {
         return false;
     }
-    return this.canMove() && this.isOccasionOk(item);
+    return Game_BattlerBase.prototype.meetsUsableItemConditions.call(this, item);
 };
 
 //-----------------------------------------------------------------------------
@@ -4592,17 +4443,17 @@ Game_Enemy.prototype.performDamage = function() {
 Game_Enemy.prototype.performCollapse = function() {
     Game_Battler.prototype.performCollapse.call(this);
     switch (this.collapseType()) {
-        case 0:
-            this.requestEffect('collapse');
-            SoundManager.playEnemyCollapse();
-            break;
-        case 1:
-            this.requestEffect('bossCollapse');
-            SoundManager.playBossCollapse1();
-            break;
-        case 2:
-            this.requestEffect('instantCollapse');
-            break;
+    case 0:
+        this.requestEffect('collapse');
+        SoundManager.playEnemyCollapse();
+        break;
+    case 1:
+        this.requestEffect('bossCollapse');
+        SoundManager.playBossCollapse1();
+        break;
+    case 2:
+        this.requestEffect('instantCollapse');
+        break;
     }
 };
 
@@ -4623,20 +4474,20 @@ Game_Enemy.prototype.meetsCondition = function(action) {
     var param1 = action.conditionParam1;
     var param2 = action.conditionParam2;
     switch (action.conditionType) {
-        case 1:
-            return this.meetsTurnCondition(param1, param2);
-        case 2:
-            return this.meetsHpCondition(param1, param2);
-        case 3:
-            return this.meetsMpCondition(param1, param2);
-        case 4:
-            return this.meetsStateCondition(param1);
-        case 5:
-            return this.meetsPartyLevelCondition(param1);
-        case 6:
-            return this.meetsSwitchCondition(param1);
-        default:
-            return true;
+    case 1:
+        return this.meetsTurnCondition(param1, param2);
+    case 2:
+        return this.meetsHpCondition(param1, param2);
+    case 3:
+        return this.meetsMpCondition(param1, param2);
+    case 4:
+        return this.meetsStateCondition(param1);
+    case 5:
+        return this.meetsPartyLevelCondition(param1);
+    case 6:
+        return this.meetsSwitchCondition(param1);
+    default:
+        return true;
     }
 };
 
@@ -4900,12 +4751,12 @@ function Game_Party() {
 Game_Party.prototype = Object.create(Game_Unit.prototype);
 Game_Party.prototype.constructor = Game_Party;
 
-Game_Party.ABILITY_ENCOUNTER_HALF = 0;
-Game_Party.ABILITY_ENCOUNTER_NONE = 1;
-Game_Party.ABILITY_CANCEL_SURPRISE = 2;
-Game_Party.ABILITY_RAISE_PREEMPTIVE = 3;
-Game_Party.ABILITY_GOLD_DOUBLE = 4;
-Game_Party.ABILITY_DROP_ITEM_DOUBLE = 5;
+Game_Party.ABILITY_ENCOUNTER_HALF    = 0;
+Game_Party.ABILITY_ENCOUNTER_NONE    = 1;
+Game_Party.ABILITY_CANCEL_SURPRISE   = 2;
+Game_Party.ABILITY_RAISE_PREEMPTIVE  = 3;
+Game_Party.ABILITY_GOLD_DOUBLE       = 4;
+Game_Party.ABILITY_DROP_ITEM_DOUBLE  = 5;
 
 Game_Party.prototype.initialize = function() {
     Game_Unit.prototype.initialize.call(this);
@@ -5353,12 +5204,12 @@ Game_Troop.prototype = Object.create(Game_Unit.prototype);
 Game_Troop.prototype.constructor = Game_Troop;
 
 Game_Troop.LETTER_TABLE_HALF = [
-    ' A', ' B', ' C', ' D', ' E', ' F', ' G', ' H', ' I', ' J', ' K', ' L', ' M',
-    ' N', ' O', ' P', ' Q', ' R', ' S', ' T', ' U', ' V', ' W', ' X', ' Y', ' Z'
+    ' A',' B',' C',' D',' E',' F',' G',' H',' I',' J',' K',' L',' M',
+    ' N',' O',' P',' Q',' R',' S',' T',' U',' V',' W',' X',' Y',' Z'
 ];
 Game_Troop.LETTER_TABLE_FULL = [
-    'Ａ', 'Ｂ', 'Ｃ', 'Ｄ', 'Ｅ', 'Ｆ', 'Ｇ', 'Ｈ', 'Ｉ', 'Ｊ', 'Ｋ', 'Ｌ', 'Ｍ',
-    'Ｎ', 'Ｏ', 'Ｐ', 'Ｑ', 'Ｒ', 'Ｓ', 'Ｔ', 'Ｕ', 'Ｖ', 'Ｗ', 'Ｘ', 'Ｙ', 'Ｚ'
+    'Ａ','Ｂ','Ｃ','Ｄ','Ｅ','Ｆ','Ｇ','Ｈ','Ｉ','Ｊ','Ｋ','Ｌ','Ｍ',
+    'Ｎ','Ｏ','Ｐ','Ｑ','Ｒ','Ｓ','Ｔ','Ｕ','Ｖ','Ｗ','Ｘ','Ｙ','Ｚ'
 ];
 
 Game_Troop.prototype.initialize = function() {
@@ -5435,7 +5286,7 @@ Game_Troop.prototype.makeUniqueNames = function() {
 
 Game_Troop.prototype.letterTable = function() {
     return $gameSystem.isCJK() ? Game_Troop.LETTER_TABLE_FULL :
-        Game_Troop.LETTER_TABLE_HALF;
+            Game_Troop.LETTER_TABLE_HALF;
 };
 
 Game_Troop.prototype.enemyNames = function() {
@@ -5452,8 +5303,8 @@ Game_Troop.prototype.enemyNames = function() {
 Game_Troop.prototype.meetsConditions = function(page) {
     var c = page.conditions;
     if (!c.turnEnding && !c.turnValid && !c.enemyValid &&
-        !c.actorValid && !c.switchValid) {
-        return false; // Conditions not set
+            !c.actorValid && !c.switchValid) {
+        return false;  // Conditions not set
     }
     if (c.turnEnding) {
         if (!BattleManager.isTurnEnd()) {
@@ -5669,11 +5520,11 @@ Game_Map.prototype.vehicles = function() {
 };
 
 Game_Map.prototype.vehicle = function(type) {
-    if (type === 0 || type === 'boat') {
+    if (type ===  0 || type === 'boat') {
         return this.boat();
-    } else if (type === 1 || type === 'ship') {
+    } else if (type ===  1 || type === 'ship') {
         return this.ship();
-    } else if (type === 2 || type === 'airship') {
+    } else if (type ===  2 || type === 'airship') {
         return this.airship();
     } else {
         return null;
@@ -5854,7 +5705,7 @@ Game_Map.prototype.screenTileY = function() {
 
 Game_Map.prototype.adjustX = function(x) {
     if (this.isLoopHorizontal() && x < this._displayX -
-        (this.width() - this.screenTileX()) / 2) {
+            (this.width() - this.screenTileX()) / 2) {
         return x - this._displayX + $dataMap.width;
     } else {
         return x - this._displayX;
@@ -5863,7 +5714,7 @@ Game_Map.prototype.adjustX = function(x) {
 
 Game_Map.prototype.adjustY = function(y) {
     if (this.isLoopVertical() && y < this._displayY -
-        (this.height() - this.screenTileY()) / 2) {
+            (this.height() - this.screenTileY()) / 2) {
         return y - this._displayY + $dataMap.height;
     } else {
         return y - this._displayY;
@@ -5938,7 +5789,11 @@ Game_Map.prototype.canvasToMapY = function(y) {
 
 Game_Map.prototype.autoplay = function() {
     if ($dataMap.autoplayBgm) {
-        AudioManager.playBgm($dataMap.bgm);
+        if ($gamePlayer.isInVehicle()) {
+            $gameSystem.saveWalkingBgm2();
+        } else {
+            AudioManager.playBgm($dataMap.bgm);
+        }
     }
     if ($dataMap.autoplayBgs) {
         AudioManager.playBgs($dataMap.bgs);
@@ -6058,9 +5913,9 @@ Game_Map.prototype.checkPassage = function(x, y, bit) {
     var tiles = this.allTiles(x, y);
     for (var i = 0; i < tiles.length; i++) {
         var flag = flags[tiles[i]];
-        if ((flag & 0x10) !== 0) // [*] No effect on passage
+        if ((flag & 0x10) !== 0)  // [*] No effect on passage
             continue;
-        if ((flag & bit) === 0) // [o] Passable
+        if ((flag & bit) === 0)   // [o] Passable
             return true;
         if ((flag & bit) === bit) // [x] Impassable
             return false;
@@ -6191,18 +6046,18 @@ Game_Map.prototype.scrollDistance = function() {
 
 Game_Map.prototype.doScroll = function(direction, distance) {
     switch (direction) {
-        case 2:
-            this.scrollDown(distance);
-            break;
-        case 4:
-            this.scrollLeft(distance);
-            break;
-        case 6:
-            this.scrollRight(distance);
-            break;
-        case 8:
-            this.scrollUp(distance);
-            break;
+    case 2:
+        this.scrollDown(distance);
+        break;
+    case 4:
+        this.scrollLeft(distance);
+        break;
+    case 6:
+        this.scrollRight(distance);
+        break;
+    case 8:
+        this.scrollUp(distance);
+        break;
     }
 };
 
@@ -6391,18 +6246,8 @@ function Game_CharacterBase() {
 }
 
 Object.defineProperties(Game_CharacterBase.prototype, {
-    x: {
-        get: function() {
-            return this._x;
-        },
-        configurable: true
-    },
-    y: {
-        get: function() {
-            return this._y;
-        },
-        configurable: true
-    }
+    x: { get: function() { return this._x; }, configurable: true },
+    y: { get: function() { return this._y; }, configurable: true }
 });
 
 Game_CharacterBase.prototype.initialize = function() {
@@ -6501,7 +6346,7 @@ Game_CharacterBase.prototype.isJumping = function() {
 
 Game_CharacterBase.prototype.jumpHeight = function() {
     return (this._jumpPeak * this._jumpPeak -
-        Math.pow(Math.abs(this._jumpCount - this._jumpPeak), 2)) / 2;
+            Math.pow(Math.abs(this._jumpCount - this._jumpPeak), 2)) / 2;
 };
 
 Game_CharacterBase.prototype.isStopping = function() {
@@ -6655,7 +6500,7 @@ Game_CharacterBase.prototype.screenX = function() {
 Game_CharacterBase.prototype.screenY = function() {
     var th = $gameMap.tileHeight();
     return Math.round(this.scrolledY() * th + th -
-        this.shiftY() - this.jumpHeight());
+                      this.shiftY() - this.jumpHeight());
 };
 
 Game_CharacterBase.prototype.screenZ = function() {
@@ -6767,7 +6612,7 @@ Game_CharacterBase.prototype.resetPattern = function() {
 
 Game_CharacterBase.prototype.refreshBushDepth = function() {
     if (this.isNormalPriority() && !this.isObjectCharacter() &&
-        this.isOnBush() && !this.isJumping()) {
+            this.isOnBush() && !this.isJumping()) {
         if (!this.isMoving()) {
             this._bushDepth = 12;
         }
@@ -6993,52 +6838,52 @@ function Game_Character() {
 Game_Character.prototype = Object.create(Game_CharacterBase.prototype);
 Game_Character.prototype.constructor = Game_Character;
 
-Game_Character.ROUTE_END = 0;
-Game_Character.ROUTE_MOVE_DOWN = 1;
-Game_Character.ROUTE_MOVE_LEFT = 2;
-Game_Character.ROUTE_MOVE_RIGHT = 3;
-Game_Character.ROUTE_MOVE_UP = 4;
-Game_Character.ROUTE_MOVE_LOWER_L = 5;
-Game_Character.ROUTE_MOVE_LOWER_R = 6;
-Game_Character.ROUTE_MOVE_UPPER_L = 7;
-Game_Character.ROUTE_MOVE_UPPER_R = 8;
-Game_Character.ROUTE_MOVE_RANDOM = 9;
-Game_Character.ROUTE_MOVE_TOWARD = 10;
-Game_Character.ROUTE_MOVE_AWAY = 11;
-Game_Character.ROUTE_MOVE_FORWARD = 12;
-Game_Character.ROUTE_MOVE_BACKWARD = 13;
-Game_Character.ROUTE_JUMP = 14;
-Game_Character.ROUTE_WAIT = 15;
-Game_Character.ROUTE_TURN_DOWN = 16;
-Game_Character.ROUTE_TURN_LEFT = 17;
-Game_Character.ROUTE_TURN_RIGHT = 18;
-Game_Character.ROUTE_TURN_UP = 19;
-Game_Character.ROUTE_TURN_90D_R = 20;
-Game_Character.ROUTE_TURN_90D_L = 21;
-Game_Character.ROUTE_TURN_180D = 22;
-Game_Character.ROUTE_TURN_90D_R_L = 23;
-Game_Character.ROUTE_TURN_RANDOM = 24;
-Game_Character.ROUTE_TURN_TOWARD = 25;
-Game_Character.ROUTE_TURN_AWAY = 26;
-Game_Character.ROUTE_SWITCH_ON = 27;
-Game_Character.ROUTE_SWITCH_OFF = 28;
-Game_Character.ROUTE_CHANGE_SPEED = 29;
-Game_Character.ROUTE_CHANGE_FREQ = 30;
-Game_Character.ROUTE_WALK_ANIME_ON = 31;
-Game_Character.ROUTE_WALK_ANIME_OFF = 32;
-Game_Character.ROUTE_STEP_ANIME_ON = 33;
-Game_Character.ROUTE_STEP_ANIME_OFF = 34;
-Game_Character.ROUTE_DIR_FIX_ON = 35;
-Game_Character.ROUTE_DIR_FIX_OFF = 36;
-Game_Character.ROUTE_THROUGH_ON = 37;
-Game_Character.ROUTE_THROUGH_OFF = 38;
-Game_Character.ROUTE_TRANSPARENT_ON = 39;
-Game_Character.ROUTE_TRANSPARENT_OFF = 40;
-Game_Character.ROUTE_CHANGE_IMAGE = 41;
-Game_Character.ROUTE_CHANGE_OPACITY = 42;
+Game_Character.ROUTE_END               = 0;
+Game_Character.ROUTE_MOVE_DOWN         = 1;
+Game_Character.ROUTE_MOVE_LEFT         = 2;
+Game_Character.ROUTE_MOVE_RIGHT        = 3;
+Game_Character.ROUTE_MOVE_UP           = 4;
+Game_Character.ROUTE_MOVE_LOWER_L      = 5;
+Game_Character.ROUTE_MOVE_LOWER_R      = 6;
+Game_Character.ROUTE_MOVE_UPPER_L      = 7;
+Game_Character.ROUTE_MOVE_UPPER_R      = 8;
+Game_Character.ROUTE_MOVE_RANDOM       = 9;
+Game_Character.ROUTE_MOVE_TOWARD       = 10;
+Game_Character.ROUTE_MOVE_AWAY         = 11;
+Game_Character.ROUTE_MOVE_FORWARD      = 12;
+Game_Character.ROUTE_MOVE_BACKWARD     = 13;
+Game_Character.ROUTE_JUMP              = 14;
+Game_Character.ROUTE_WAIT              = 15;
+Game_Character.ROUTE_TURN_DOWN         = 16;
+Game_Character.ROUTE_TURN_LEFT         = 17;
+Game_Character.ROUTE_TURN_RIGHT        = 18;
+Game_Character.ROUTE_TURN_UP           = 19;
+Game_Character.ROUTE_TURN_90D_R        = 20;
+Game_Character.ROUTE_TURN_90D_L        = 21;
+Game_Character.ROUTE_TURN_180D         = 22;
+Game_Character.ROUTE_TURN_90D_R_L      = 23;
+Game_Character.ROUTE_TURN_RANDOM       = 24;
+Game_Character.ROUTE_TURN_TOWARD       = 25;
+Game_Character.ROUTE_TURN_AWAY         = 26;
+Game_Character.ROUTE_SWITCH_ON         = 27;
+Game_Character.ROUTE_SWITCH_OFF        = 28;
+Game_Character.ROUTE_CHANGE_SPEED      = 29;
+Game_Character.ROUTE_CHANGE_FREQ       = 30;
+Game_Character.ROUTE_WALK_ANIME_ON     = 31;
+Game_Character.ROUTE_WALK_ANIME_OFF    = 32;
+Game_Character.ROUTE_STEP_ANIME_ON     = 33;
+Game_Character.ROUTE_STEP_ANIME_OFF    = 34;
+Game_Character.ROUTE_DIR_FIX_ON        = 35;
+Game_Character.ROUTE_DIR_FIX_OFF       = 36;
+Game_Character.ROUTE_THROUGH_ON        = 37;
+Game_Character.ROUTE_THROUGH_OFF       = 38;
+Game_Character.ROUTE_TRANSPARENT_ON    = 39;
+Game_Character.ROUTE_TRANSPARENT_OFF   = 40;
+Game_Character.ROUTE_CHANGE_IMAGE      = 41;
+Game_Character.ROUTE_CHANGE_OPACITY    = 42;
 Game_Character.ROUTE_CHANGE_BLEND_MODE = 43;
-Game_Character.ROUTE_PLAY_SE = 44;
-Game_Character.ROUTE_SCRIPT = 45;
+Game_Character.ROUTE_PLAY_SE           = 44;
+Game_Character.ROUTE_SCRIPT            = 45;
 
 Game_Character.prototype.initialize = function() {
     Game_CharacterBase.prototype.initialize.call(this);
@@ -7055,14 +6900,14 @@ Game_Character.prototype.initMembers = function() {
 };
 
 Game_Character.prototype.memorizeMoveRoute = function() {
-    this._originalMoveRoute = this._moveRoute;
-    this._originalMoveRouteIndex = this._moveRouteIndex;
+    this._originalMoveRoute       = this._moveRoute;
+    this._originalMoveRouteIndex  = this._moveRouteIndex;
 };
 
 Game_Character.prototype.restoreMoveRoute = function() {
-    this._moveRoute = this._originalMoveRoute;
-    this._moveRouteIndex = this._originalMoveRouteIndex;
-    this._originalMoveRoute = null;
+    this._moveRoute          = this._originalMoveRoute;
+    this._moveRouteIndex     = this._originalMoveRouteIndex;
+    this._originalMoveRoute  = null;
 };
 
 Game_Character.prototype.isMoveRouteForcing = function() {
@@ -7109,144 +6954,144 @@ Game_Character.prototype.processMoveCommand = function(command) {
     var gc = Game_Character;
     var params = command.parameters;
     switch (command.code) {
-        case gc.ROUTE_END:
-            this.processRouteEnd();
-            break;
-        case gc.ROUTE_MOVE_DOWN:
-            this.moveStraight(2);
-            break;
-        case gc.ROUTE_MOVE_LEFT:
-            this.moveStraight(4);
-            break;
-        case gc.ROUTE_MOVE_RIGHT:
-            this.moveStraight(6);
-            break;
-        case gc.ROUTE_MOVE_UP:
-            this.moveStraight(8);
-            break;
-        case gc.ROUTE_MOVE_LOWER_L:
-            this.moveDiagonally(4, 2);
-            break;
-        case gc.ROUTE_MOVE_LOWER_R:
-            this.moveDiagonally(6, 2);
-            break;
-        case gc.ROUTE_MOVE_UPPER_L:
-            this.moveDiagonally(4, 8);
-            break;
-        case gc.ROUTE_MOVE_UPPER_R:
-            this.moveDiagonally(6, 8);
-            break;
-        case gc.ROUTE_MOVE_RANDOM:
-            this.moveRandom();
-            break;
-        case gc.ROUTE_MOVE_TOWARD:
-            this.moveTowardPlayer();
-            break;
-        case gc.ROUTE_MOVE_AWAY:
-            this.moveAwayFromPlayer();
-            break;
-        case gc.ROUTE_MOVE_FORWARD:
-            this.moveForward();
-            break;
-        case gc.ROUTE_MOVE_BACKWARD:
-            this.moveBackward();
-            break;
-        case gc.ROUTE_JUMP:
-            this.jump(params[0], params[1]);
-            break;
-        case gc.ROUTE_WAIT:
-            this._waitCount = params[0] - 1;
-            break;
-        case gc.ROUTE_TURN_DOWN:
-            this.setDirection(2);
-            break;
-        case gc.ROUTE_TURN_LEFT:
-            this.setDirection(4);
-            break;
-        case gc.ROUTE_TURN_RIGHT:
-            this.setDirection(6);
-            break;
-        case gc.ROUTE_TURN_UP:
-            this.setDirection(8);
-            break;
-        case gc.ROUTE_TURN_90D_R:
-            this.turnRight90();
-            break;
-        case gc.ROUTE_TURN_90D_L:
-            this.turnLeft90();
-            break;
-        case gc.ROUTE_TURN_180D:
-            this.turn180();
-            break;
-        case gc.ROUTE_TURN_90D_R_L:
-            this.turnRightOrLeft90();
-            break;
-        case gc.ROUTE_TURN_RANDOM:
-            this.turnRandom();
-            break;
-        case gc.ROUTE_TURN_TOWARD:
-            this.turnTowardPlayer();
-            break;
-        case gc.ROUTE_TURN_AWAY:
-            this.turnAwayFromPlayer();
-            break;
-        case gc.ROUTE_SWITCH_ON:
-            $gameSwitches.setValue(params[0], true);
-            break;
-        case gc.ROUTE_SWITCH_OFF:
-            $gameSwitches.setValue(params[0], false);
-            break;
-        case gc.ROUTE_CHANGE_SPEED:
-            this.setMoveSpeed(params[0]);
-            break;
-        case gc.ROUTE_CHANGE_FREQ:
-            this.setMoveFrequency(params[0]);
-            break;
-        case gc.ROUTE_WALK_ANIME_ON:
-            this.setWalkAnime(true);
-            break;
-        case gc.ROUTE_WALK_ANIME_OFF:
-            this.setWalkAnime(false);
-            break;
-        case gc.ROUTE_STEP_ANIME_ON:
-            this.setStepAnime(true);
-            break;
-        case gc.ROUTE_STEP_ANIME_OFF:
-            this.setStepAnime(false);
-            break;
-        case gc.ROUTE_DIR_FIX_ON:
-            this.setDirectionFix(true);
-            break;
-        case gc.ROUTE_DIR_FIX_OFF:
-            this.setDirectionFix(false);
-            break;
-        case gc.ROUTE_THROUGH_ON:
-            this.setThrough(true);
-            break;
-        case gc.ROUTE_THROUGH_OFF:
-            this.setThrough(false);
-            break;
-        case gc.ROUTE_TRANSPARENT_ON:
-            this.setTransparent(true);
-            break;
-        case gc.ROUTE_TRANSPARENT_OFF:
-            this.setTransparent(false);
-            break;
-        case gc.ROUTE_CHANGE_IMAGE:
-            this.setImage(params[0], params[1]);
-            break;
-        case gc.ROUTE_CHANGE_OPACITY:
-            this.setOpacity(params[0]);
-            break;
-        case gc.ROUTE_CHANGE_BLEND_MODE:
-            this.setBlendMode(params[0]);
-            break;
-        case gc.ROUTE_PLAY_SE:
-            AudioManager.playSe(params[0]);
-            break;
-        case gc.ROUTE_SCRIPT:
-            eval(params[0]);
-            break;
+    case gc.ROUTE_END:
+        this.processRouteEnd();
+        break;
+    case gc.ROUTE_MOVE_DOWN:
+        this.moveStraight(2);
+        break;
+    case gc.ROUTE_MOVE_LEFT:
+        this.moveStraight(4);
+        break;
+    case gc.ROUTE_MOVE_RIGHT:
+        this.moveStraight(6);
+        break;
+    case gc.ROUTE_MOVE_UP:
+        this.moveStraight(8);
+        break;
+    case gc.ROUTE_MOVE_LOWER_L:
+        this.moveDiagonally(4, 2);
+        break;
+    case gc.ROUTE_MOVE_LOWER_R:
+        this.moveDiagonally(6, 2);
+        break;
+    case gc.ROUTE_MOVE_UPPER_L:
+        this.moveDiagonally(4, 8);
+        break;
+    case gc.ROUTE_MOVE_UPPER_R:
+        this.moveDiagonally(6, 8);
+        break;
+    case gc.ROUTE_MOVE_RANDOM:
+        this.moveRandom();
+        break;
+    case gc.ROUTE_MOVE_TOWARD:
+        this.moveTowardPlayer();
+        break;
+    case gc.ROUTE_MOVE_AWAY:
+        this.moveAwayFromPlayer();
+        break;
+    case gc.ROUTE_MOVE_FORWARD:
+        this.moveForward();
+        break;
+    case gc.ROUTE_MOVE_BACKWARD:
+        this.moveBackward();
+        break;
+    case gc.ROUTE_JUMP:
+        this.jump(params[0], params[1]);
+        break;
+    case gc.ROUTE_WAIT:
+        this._waitCount = params[0] - 1;
+        break;
+    case gc.ROUTE_TURN_DOWN:
+        this.setDirection(2);
+        break;
+    case gc.ROUTE_TURN_LEFT:
+        this.setDirection(4);
+        break;
+    case gc.ROUTE_TURN_RIGHT:
+        this.setDirection(6);
+        break;
+    case gc.ROUTE_TURN_UP:
+        this.setDirection(8);
+        break;
+    case gc.ROUTE_TURN_90D_R:
+        this.turnRight90();
+        break;
+    case gc.ROUTE_TURN_90D_L:
+        this.turnLeft90();
+        break;
+    case gc.ROUTE_TURN_180D:
+        this.turn180();
+        break;
+    case gc.ROUTE_TURN_90D_R_L:
+        this.turnRightOrLeft90();
+        break;
+    case gc.ROUTE_TURN_RANDOM:
+        this.turnRandom();
+        break;
+    case gc.ROUTE_TURN_TOWARD:
+        this.turnTowardPlayer();
+        break;
+    case gc.ROUTE_TURN_AWAY:
+        this.turnAwayFromPlayer();
+        break;
+    case gc.ROUTE_SWITCH_ON:
+        $gameSwitches.setValue(params[0], true);
+        break;
+    case gc.ROUTE_SWITCH_OFF:
+        $gameSwitches.setValue(params[0], false);
+        break;
+    case gc.ROUTE_CHANGE_SPEED:
+        this.setMoveSpeed(params[0]);
+        break;
+    case gc.ROUTE_CHANGE_FREQ:
+        this.setMoveFrequency(params[0]);
+        break;
+    case gc.ROUTE_WALK_ANIME_ON:
+        this.setWalkAnime(true);
+        break;
+    case gc.ROUTE_WALK_ANIME_OFF:
+        this.setWalkAnime(false);
+        break;
+    case gc.ROUTE_STEP_ANIME_ON:
+        this.setStepAnime(true);
+        break;
+    case gc.ROUTE_STEP_ANIME_OFF:
+        this.setStepAnime(false);
+        break;
+    case gc.ROUTE_DIR_FIX_ON:
+        this.setDirectionFix(true);
+        break;
+    case gc.ROUTE_DIR_FIX_OFF:
+        this.setDirectionFix(false);
+        break;
+    case gc.ROUTE_THROUGH_ON:
+        this.setThrough(true);
+        break;
+    case gc.ROUTE_THROUGH_OFF:
+        this.setThrough(false);
+        break;
+    case gc.ROUTE_TRANSPARENT_ON:
+        this.setTransparent(true);
+        break;
+    case gc.ROUTE_TRANSPARENT_OFF:
+        this.setTransparent(false);
+        break;
+    case gc.ROUTE_CHANGE_IMAGE:
+        this.setImage(params[0], params[1]);
+        break;
+    case gc.ROUTE_CHANGE_OPACITY:
+        this.setOpacity(params[0]);
+        break;
+    case gc.ROUTE_CHANGE_BLEND_MODE:
+        this.setBlendMode(params[0]);
+        break;
+    case gc.ROUTE_PLAY_SE:
+        AudioManager.playSe(params[0]);
+        break;
+    case gc.ROUTE_SCRIPT:
+        eval(params[0]);
+        break;
     }
 };
 
@@ -7366,35 +7211,35 @@ Game_Character.prototype.advanceMoveRouteIndex = function() {
 
 Game_Character.prototype.turnRight90 = function() {
     switch (this.direction()) {
-        case 2:
-            this.setDirection(4);
-            break;
-        case 4:
-            this.setDirection(8);
-            break;
-        case 6:
-            this.setDirection(2);
-            break;
-        case 8:
-            this.setDirection(6);
-            break;
+    case 2:
+        this.setDirection(4);
+        break;
+    case 4:
+        this.setDirection(8);
+        break;
+    case 6:
+        this.setDirection(2);
+        break;
+    case 8:
+        this.setDirection(6);
+        break;
     }
 };
 
 Game_Character.prototype.turnLeft90 = function() {
     switch (this.direction()) {
-        case 2:
-            this.setDirection(6);
-            break;
-        case 4:
-            this.setDirection(2);
-            break;
-        case 6:
-            this.setDirection(8);
-            break;
-        case 8:
-            this.setDirection(4);
-            break;
+    case 2:
+        this.setDirection(6);
+        break;
+    case 4:
+        this.setDirection(2);
+        break;
+    case 6:
+        this.setDirection(8);
+        break;
+    case 8:
+        this.setDirection(4);
+        break;
     }
 };
 
@@ -7404,12 +7249,12 @@ Game_Character.prototype.turn180 = function() {
 
 Game_Character.prototype.turnRightOrLeft90 = function() {
     switch (Math.randomInt(2)) {
-        case 0:
-            this.turnRight90();
-            break;
-        case 1:
-            this.turnLeft90();
-            break;
+    case 0:
+        this.turnRight90();
+        break;
+    case 1:
+        this.turnLeft90();
+        break;
     }
 };
 
@@ -7465,7 +7310,6 @@ Game_Character.prototype.findDirectionTo = function(goalX, goalY) {
 
         if (current.x === goalX && current.y === goalY) {
             best = current;
-            goaled = true;
             break;
         }
 
@@ -7748,7 +7592,7 @@ Game_Player.prototype.makeEncounterTroopId = function() {
 
 Game_Player.prototype.meetsEncounterConditions = function(encounter) {
     return (encounter.regionSet.length === 0 ||
-        encounter.regionSet.contains(this.regionId()));
+            encounter.regionSet.contains(this.regionId()));
 };
 
 Game_Player.prototype.executeEncounter = function() {
@@ -7782,7 +7626,7 @@ Game_Player.prototype.moveByInput = function() {
         var direction = this.getInputDirection();
         if (direction > 0) {
             $gameTemp.clearDestination();
-        } else if ($gameTemp.isDestinationValid()) {
+        } else if ($gameTemp.isDestinationValid()){
             var x = $gameTemp.destinationX();
             var y = $gameTemp.destinationY();
             direction = this.findDirectionTo(x, y);
@@ -7910,7 +7754,7 @@ Game_Player.prototype.updateNonmoving = function(wasMoving) {
     if (!$gameMap.isEventRunning()) {
         if (wasMoving) {
             $gameParty.onPlayerWalk();
-            this.checkEventTriggerHere([1, 2]);
+            this.checkEventTriggerHere([1,2]);
             if ($gameMap.setupStartingEvent()) {
                 return;
             }
@@ -7947,7 +7791,7 @@ Game_Player.prototype.triggerButtonAction = function() {
         if ($gameMap.setupStartingEvent()) {
             return true;
         }
-        this.checkEventTriggerThere([0, 1, 2]);
+        this.checkEventTriggerThere([0,1,2]);
         if ($gameMap.setupStartingEvent()) {
             return true;
         }
@@ -7956,7 +7800,7 @@ Game_Player.prototype.triggerButtonAction = function() {
 };
 
 Game_Player.prototype.triggerTouchAction = function() {
-    if ($gameTemp.isDestinationValid()) {
+    if ($gameTemp.isDestinationValid()){
         var direction = this.direction();
         var x1 = this.x;
         var y1 = this.y;
@@ -7998,13 +7842,13 @@ Game_Player.prototype.triggerTouchActionD2 = function(x2, y2) {
             return true;
         }
     }
-    this.checkEventTriggerThere([0, 1, 2]);
+    this.checkEventTriggerThere([0,1,2]);
     return $gameMap.setupStartingEvent();
 };
 
 Game_Player.prototype.triggerTouchActionD3 = function(x2, y2) {
     if ($gameMap.isCounter(x2, y2)) {
-        this.checkEventTriggerThere([0, 1, 2]);
+        this.checkEventTriggerThere([0,1,2]);
     }
     return $gameMap.setupStartingEvent();
 };
@@ -8017,7 +7861,7 @@ Game_Player.prototype.updateEncounterCount = function() {
 
 Game_Player.prototype.canEncounter = function() {
     return (!$gameParty.hasEncounterNone() && $gameSystem.isEncounterEnabled() &&
-        !this.isInAirship() && !this.isMoveRouteForcing() && !this.isDebugThrough());
+            !this.isInAirship() && !this.isMoveRouteForcing() && !this.isDebugThrough());
 };
 
 Game_Player.prototype.encounterProgressValue = function() {
@@ -8055,7 +7899,7 @@ Game_Player.prototype.checkEventTriggerThere = function(triggers) {
 
 Game_Player.prototype.checkEventTriggerTouch = function(x, y) {
     if (this.canStartLocalEvents()) {
-        this.startMapEvent(x, y, [1, 2], true);
+        this.startMapEvent(x, y, [1,2], true);
     }
 };
 
@@ -8628,7 +8472,7 @@ Game_Event.prototype.list = function() {
 
 Game_Event.prototype.isCollidedWithCharacters = function(x, y) {
     return (Game_Character.prototype.isCollidedWithCharacters.call(this, x, y) ||
-        this.isCollidedWithPlayerCharacters(x, y));
+            this.isCollidedWithPlayerCharacters(x, y));
 };
 
 Game_Event.prototype.isCollidedWithEvents = function(x, y) {
@@ -8667,17 +8511,17 @@ Game_Event.prototype.updateStop = function() {
 
 Game_Event.prototype.updateSelfMovement = function() {
     if (!this._locked && this.isNearTheScreen() &&
-        this.checkStop(this.stopCountThreshold())) {
+            this.checkStop(this.stopCountThreshold())) {
         switch (this._moveType) {
-            case 1:
-                this.moveTypeRandom();
-                break;
-            case 2:
-                this.moveTypeTowardPlayer();
-                break;
-            case 3:
-                this.moveTypeCustom();
-                break;
+        case 1:
+            this.moveTypeRandom();
+            break;
+        case 2:
+            this.moveTypeTowardPlayer();
+            break;
+        case 3:
+            this.moveTypeCustom();
+            break;
         }
     }
 };
@@ -8688,36 +8532,30 @@ Game_Event.prototype.stopCountThreshold = function() {
 
 Game_Event.prototype.moveTypeRandom = function() {
     switch (Math.randomInt(6)) {
-        case 0:
-        case 1:
-            this.moveRandom();
-            break;
-        case 2:
-        case 3:
-        case 4:
-            this.moveForward();
-            break;
-        case 5:
-            this.resetStopCount();
-            break;
+    case 0: case 1:
+        this.moveRandom();
+        break;
+    case 2: case 3: case 4:
+        this.moveForward();
+        break;
+    case 5:
+        this.resetStopCount();
+        break;
     }
 };
 
 Game_Event.prototype.moveTypeTowardPlayer = function() {
     if (this.isNearThePlayer()) {
         switch (Math.randomInt(6)) {
-            case 0:
-            case 1:
-            case 2:
-            case 3:
-                this.moveTowardPlayer();
-                break;
-            case 4:
-                this.moveRandom();
-                break;
-            case 5:
-                this.moveForward();
-                break;
+        case 0: case 1: case 2: case 3:
+            this.moveTowardPlayer();
+            break;
+        case 4:
+            this.moveRandom();
+            break;
+        case 5:
+            this.moveForward();
+            break;
         }
     } else {
         this.moveRandom();
@@ -8750,7 +8588,7 @@ Game_Event.prototype.start = function() {
     var list = this.list();
     if (list && list.length > 1) {
         this._starting = true;
-        if (this.isTriggerIn([0, 1, 2])) {
+        if (this.isTriggerIn([0,1,2])) {
             this.lock();
         }
     }
@@ -8964,6 +8802,7 @@ Game_Interpreter.prototype.setup = function(list, eventId) {
     this._mapId = $gameMap.mapId();
     this._eventId = eventId || 0;
     this._list = list;
+    Game_Interpreter.requestImages(list);
 };
 
 Game_Interpreter.prototype.eventId = function() {
@@ -9032,36 +8871,36 @@ Game_Interpreter.prototype.updateWaitCount = function() {
 Game_Interpreter.prototype.updateWaitMode = function() {
     var waiting = false;
     switch (this._waitMode) {
-        case 'message':
-            waiting = $gameMessage.isBusy();
-            break;
-        case 'transfer':
-            waiting = $gamePlayer.isTransferring();
-            break;
-        case 'scroll':
-            waiting = $gameMap.isScrolling();
-            break;
-        case 'route':
-            waiting = this._character.isMoveRouteForcing();
-            break;
-        case 'animation':
-            waiting = this._character.isAnimationPlaying();
-            break;
-        case 'balloon':
-            waiting = this._character.isBalloonPlaying();
-            break;
-        case 'gather':
-            waiting = $gamePlayer.areFollowersGathering();
-            break;
-        case 'action':
-            waiting = BattleManager.isActionForced();
-            break;
-        case 'video':
-            waiting = Graphics.isVideoPlaying();
-            break;
-        case 'image':
-            waiting = !ImageManager.isReady();
-            break;
+    case 'message':
+        waiting = $gameMessage.isBusy();
+        break;
+    case 'transfer':
+        waiting = $gamePlayer.isTransferring();
+        break;
+    case 'scroll':
+        waiting = $gameMap.isScrolling();
+        break;
+    case 'route':
+        waiting = this._character.isMoveRouteForcing();
+        break;
+    case 'animation':
+        waiting = this._character.isAnimationPlaying();
+        break;
+    case 'balloon':
+        waiting = this._character.isBalloonPlaying();
+        break;
+    case 'gather':
+        waiting = $gamePlayer.areFollowersGathering();
+        break;
+    case 'action':
+        waiting = BattleManager.isActionForced();
+        break;
+    case 'video':
+        waiting = Graphics.isVideoPlaying();
+        break;
+    case 'image':
+        waiting = !ImageManager.isReady();
+        break;
     }
     if (!waiting) {
         this._waitMode = '';
@@ -9221,23 +9060,23 @@ Game_Interpreter.prototype.command101 = function() {
         $gameMessage.setFaceImage(this._params[0], this._params[1]);
         $gameMessage.setBackground(this._params[2]);
         $gameMessage.setPositionType(this._params[3]);
-        while (this.nextEventCode() === 401) { // Text data
+        while (this.nextEventCode() === 401) {  // Text data
             this._index++;
             $gameMessage.add(this.currentCommand().parameters[0]);
         }
         switch (this.nextEventCode()) {
-            case 102: // Show Choices
-                this._index++;
-                this.setupChoices(this.currentCommand().parameters);
-                break;
-            case 103: // Input Number
-                this._index++;
-                this.setupNumInput(this.currentCommand().parameters);
-                break;
-            case 104: // Select Item
-                this._index++;
-                this.setupItemChoice(this.currentCommand().parameters);
-                break;
+        case 102:  // Show Choices
+            this._index++;
+            this.setupChoices(this.currentCommand().parameters);
+            break;
+        case 103:  // Input Number
+            this._index++;
+            this.setupNumInput(this.currentCommand().parameters);
+            break;
+        case 104:  // Select Item
+            this._index++;
+            this.setupItemChoice(this.currentCommand().parameters);
+            break;
         }
         this._index++;
         this.setWaitMode('message');
@@ -9344,10 +9183,10 @@ Game_Interpreter.prototype.command108 = function() {
 Game_Interpreter.prototype.command111 = function() {
     var result = false;
     switch (this._params[0]) {
-        case 0: // Switch
+        case 0:  // Switch
             result = ($gameSwitches.value(this._params[1]) === (this._params[2] === 0));
             break;
-        case 1: // Variable
+        case 1:  // Variable
             var value1 = $gameVariables.value(this._params[1]);
             var value2;
             if (this._params[2] === 0) {
@@ -9356,33 +9195,33 @@ Game_Interpreter.prototype.command111 = function() {
                 value2 = $gameVariables.value(this._params[3]);
             }
             switch (this._params[4]) {
-                case 0: // Equal to
+                case 0:  // Equal to
                     result = (value1 === value2);
                     break;
-                case 1: // Greater than or Equal to
+                case 1:  // Greater than or Equal to
                     result = (value1 >= value2);
                     break;
-                case 2: // Less than or Equal to
+                case 2:  // Less than or Equal to
                     result = (value1 <= value2);
                     break;
-                case 3: // Greater than
+                case 3:  // Greater than
                     result = (value1 > value2);
                     break;
-                case 4: // Less than
+                case 4:  // Less than
                     result = (value1 < value2);
                     break;
-                case 5: // Not Equal to
+                case 5:  // Not Equal to
                     result = (value1 !== value2);
                     break;
             }
             break;
-        case 2: // Self Switch
+        case 2:  // Self Switch
             if (this._eventId > 0) {
                 var key = [this._mapId, this._eventId, this._params[1]];
                 result = ($gameSelfSwitches.value(key) === (this._params[2] === 0));
             }
             break;
-        case 3: // Timer
+        case 3:  // Timer
             if ($gameTimer.isWorking()) {
                 if (this._params[2] === 0) {
                     result = ($gameTimer.seconds() >= this._params[1]);
@@ -9391,83 +9230,83 @@ Game_Interpreter.prototype.command111 = function() {
                 }
             }
             break;
-        case 4: // Actor
+        case 4:  // Actor
             var actor = $gameActors.actor(this._params[1]);
             if (actor) {
                 var n = this._params[3];
                 switch (this._params[2]) {
-                    case 0: // In the Party
+                    case 0:  // In the Party
                         result = $gameParty.members().contains(actor);
                         break;
-                    case 1: // Name
+                    case 1:  // Name
                         result = (actor.name() === n);
                         break;
-                    case 2: // Class
+                    case 2:  // Class
                         result = actor.isClass($dataClasses[n]);
                         break;
-                    case 3: // Skill
+                    case 3:  // Skill
                         result = actor.hasSkill(n);
                         break;
-                    case 4: // Weapon
+                    case 4:  // Weapon
                         result = actor.hasWeapon($dataWeapons[n]);
                         break;
-                    case 5: // Armor
+                    case 5:  // Armor
                         result = actor.hasArmor($dataArmors[n]);
                         break;
-                    case 6: // State
+                    case 6:  // State
                         result = actor.isStateAffected(n);
                         break;
                 }
             }
             break;
-        case 5: // Enemy
+        case 5:  // Enemy
             var enemy = $gameTroop.members()[this._params[1]];
             if (enemy) {
                 switch (this._params[2]) {
-                    case 0: // Appeared
+                    case 0:  // Appeared
                         result = enemy.isAlive();
                         break;
-                    case 1: // State
+                    case 1:  // State
                         result = enemy.isStateAffected(this._params[3]);
                         break;
                 }
             }
             break;
-        case 6: // Character
+        case 6:  // Character
             var character = this.character(this._params[1]);
             if (character) {
                 result = (character.direction() === this._params[2]);
             }
             break;
-        case 7: // Gold
+        case 7:  // Gold
             switch (this._params[2]) {
-                case 0: // Greater than or equal to
+                case 0:  // Greater than or equal to
                     result = ($gameParty.gold() >= this._params[1]);
                     break;
-                case 1: // Less than or equal to
+                case 1:  // Less than or equal to
                     result = ($gameParty.gold() <= this._params[1]);
                     break;
-                case 2: // Less than
+                case 2:  // Less than
                     result = ($gameParty.gold() < this._params[1]);
                     break;
             }
             break;
-        case 8: // Item
+        case 8:  // Item
             result = $gameParty.hasItem($dataItems[this._params[1]]);
             break;
-        case 9: // Weapon
+        case 9:  // Weapon
             result = $gameParty.hasItem($dataWeapons[this._params[1]], this._params[2]);
             break;
-        case 10: // Armor
+        case 10:  // Armor
             result = $gameParty.hasItem($dataArmors[this._params[1]], this._params[2]);
             break;
-        case 11: // Button
+        case 11:  // Button
             result = Input.isPressed(this._params[1]);
             break;
-        case 12: // Script
+        case 12:  // Script
             result = !!eval(this._params[1]);
             break;
-        case 13: // Vehicle
+        case 13:  // Vehicle
             result = ($gamePlayer.vehicle() === $gameMap.vehicle(this._params[1]));
             break;
     }
@@ -9584,7 +9423,11 @@ Game_Interpreter.prototype.command122 = function() {
             value = $gameVariables.value(this._params[4]);
             break;
         case 2: // Random
-            value = this._params[4] + Math.randomInt(this._params[5] - this._params[4] + 1);
+            value = this._params[5] - this._params[4] + 1;
+            for (var i = this._params[0]; i <= this._params[1]; i++) {
+                this.operateVariable(i, this._params[2], this._params[4] + Math.randomInt(value));
+            }
+            return true;
             break;
         case 3: // Game Data
             value = this.gameDataOperand(this._params[4], this._params[5], this._params[6]);
@@ -9601,90 +9444,90 @@ Game_Interpreter.prototype.command122 = function() {
 
 Game_Interpreter.prototype.gameDataOperand = function(type, param1, param2) {
     switch (type) {
-        case 0: // Item
-            return $gameParty.numItems($dataItems[param1]);
-        case 1: // Weapon
-            return $gameParty.numItems($dataWeapons[param1]);
-        case 2: // Armor
-            return $gameParty.numItems($dataArmors[param1]);
-        case 3: // Actor
-            var actor = $gameActors.actor(param1);
-            if (actor) {
-                switch (param2) {
-                    case 0: // Level
-                        return actor.level;
-                    case 1: // EXP
-                        return actor.currentExp();
-                    case 2: // HP
-                        return actor.hp;
-                    case 3: // MP
-                        return actor.mp;
-                    default: // Parameter
-                        if (param2 >= 4 && param2 <= 11) {
-                            return actor.param(param2 - 4);
-                        }
+    case 0:  // Item
+        return $gameParty.numItems($dataItems[param1]);
+    case 1:  // Weapon
+        return $gameParty.numItems($dataWeapons[param1]);
+    case 2:  // Armor
+        return $gameParty.numItems($dataArmors[param1]);
+    case 3:  // Actor
+        var actor = $gameActors.actor(param1);
+        if (actor) {
+            switch (param2) {
+            case 0:  // Level
+                return actor.level;
+            case 1:  // EXP
+                return actor.currentExp();
+            case 2:  // HP
+                return actor.hp;
+            case 3:  // MP
+                return actor.mp;
+            default:    // Parameter
+                if (param2 >= 4 && param2 <= 11) {
+                    return actor.param(param2 - 4);
                 }
             }
-            break;
-        case 4: // Enemy
-            var enemy = $gameTroop.members()[param1];
-            if (enemy) {
-                switch (param2) {
-                    case 0: // HP
-                        return enemy.hp;
-                    case 1: // MP
-                        return enemy.mp;
-                    default: // Parameter
-                        if (param2 >= 2 && param2 <= 9) {
-                            return enemy.param(param2 - 2);
-                        }
+        }
+        break;
+    case 4:  // Enemy
+        var enemy = $gameTroop.members()[param1];
+        if (enemy) {
+            switch (param2) {
+            case 0:  // HP
+                return enemy.hp;
+            case 1:  // MP
+                return enemy.mp;
+            default:    // Parameter
+                if (param2 >= 2 && param2 <= 9) {
+                    return enemy.param(param2 - 2);
                 }
             }
-            break;
-        case 5: // Character
-            var character = this.character(param1);
-            if (character) {
-                switch (param2) {
-                    case 0: // Map X
-                        return character.x;
-                    case 1: // Map Y
-                        return character.y;
-                    case 2: // Direction
-                        return character.direction();
-                    case 3: // Screen X
-                        return character.screenX();
-                    case 4: // Screen Y
-                        return character.screenY();
-                }
+        }
+        break;
+    case 5:  // Character
+        var character = this.character(param1);
+        if (character) {
+            switch (param2) {
+            case 0:  // Map X
+                return character.x;
+            case 1:  // Map Y
+                return character.y;
+            case 2:  // Direction
+                return character.direction();
+            case 3:  // Screen X
+                return character.screenX();
+            case 4:  // Screen Y
+                return character.screenY();
             }
-            break;
-        case 6: // Party
-            actor = $gameParty.members()[param1];
-            return actor ? actor.actorId() : 0;
-        case 7: // Other
-            switch (param1) {
-                case 0: // Map ID
-                    return $gameMap.mapId();
-                case 1: // Party Members
-                    return $gameParty.size();
-                case 2: // Gold
-                    return $gameParty.gold();
-                case 3: // Steps
-                    return $gameParty.steps();
-                case 4: // Play Time
-                    return $gameSystem.playtime();
-                case 5: // Timer
-                    return $gameTimer.seconds();
-                case 6: // Save Count
-                    return $gameSystem.saveCount();
-                case 7: // Battle Count
-                    return $gameSystem.battleCount();
-                case 8: // Win Count
-                    return $gameSystem.winCount();
-                case 9: // Escape Count
-                    return $gameSystem.escapeCount();
-            }
-            break;
+        }
+        break;
+    case 6:  // Party
+        actor = $gameParty.members()[param1];
+        return actor ? actor.actorId() : 0;
+    case 7:  // Other
+        switch (param1) {
+        case 0:  // Map ID
+            return $gameMap.mapId();
+        case 1:  // Party Members
+            return $gameParty.size();
+        case 2:  // Gold
+            return $gameParty.gold();
+        case 3:  // Steps
+            return $gameParty.steps();
+        case 4:  // Play Time
+            return $gameSystem.playtime();
+        case 5:  // Timer
+            return $gameTimer.seconds();
+        case 6:  // Save Count
+            return $gameSystem.saveCount();
+        case 7:  // Battle Count
+            return $gameSystem.battleCount();
+        case 8:  // Win Count
+            return $gameSystem.winCount();
+        case 9:  // Escape Count
+            return $gameSystem.escapeCount();
+        }
+        break;
     }
     return 0;
 };
@@ -9693,24 +9536,24 @@ Game_Interpreter.prototype.operateVariable = function(variableId, operationType,
     try {
         var oldValue = $gameVariables.value(variableId);
         switch (operationType) {
-            case 0: // Set
-                $gameVariables.setValue(variableId, oldValue = value);
-                break;
-            case 1: // Add
-                $gameVariables.setValue(variableId, oldValue + value);
-                break;
-            case 2: // Sub
-                $gameVariables.setValue(variableId, oldValue - value);
-                break;
-            case 3: // Mul
-                $gameVariables.setValue(variableId, oldValue * value);
-                break;
-            case 4: // Div
-                $gameVariables.setValue(variableId, oldValue / value);
-                break;
-            case 5: // Mod
-                $gameVariables.setValue(variableId, oldValue % value);
-                break;
+        case 0:  // Set
+            $gameVariables.setValue(variableId, oldValue = value);
+            break;
+        case 1:  // Add
+            $gameVariables.setValue(variableId, oldValue + value);
+            break;
+        case 2:  // Sub
+            $gameVariables.setValue(variableId, oldValue - value);
+            break;
+        case 3:  // Mul
+            $gameVariables.setValue(variableId, oldValue * value);
+            break;
+        case 4:  // Div
+            $gameVariables.setValue(variableId, oldValue / value);
+            break;
+        case 5:  // Mod
+            $gameVariables.setValue(variableId, oldValue % value);
+            break;
         }
     } catch (e) {
         $gameVariables.setValue(variableId, 0);
@@ -9728,9 +9571,9 @@ Game_Interpreter.prototype.command123 = function() {
 
 // Control Timer
 Game_Interpreter.prototype.command124 = function() {
-    if (this._params[0] === 0) { // Start
+    if (this._params[0] === 0) {  // Start
         $gameTimer.start(this._params[1] * 60);
-    } else { // Stop
+    } else {  // Stop
         $gameTimer.stop();
     }
     return true;
@@ -9768,12 +9611,12 @@ Game_Interpreter.prototype.command128 = function() {
 Game_Interpreter.prototype.command129 = function() {
     var actor = $gameActors.actor(this._params[0]);
     if (actor) {
-        if (this._params[1] === 0) { // Add
-            if (this._params[2]) { // Initialize
+        if (this._params[1] === 0) {  // Add
+            if (this._params[2]) {   // Initialize
                 $gameActors.actor(this._params[0]).setup(this._params[0]);
             }
             $gameParty.addActor(this._params[0]);
-        } else { // Remove
+        } else {  // Remove
             $gameParty.removeActor(this._params[0]);
         }
     }
@@ -9858,11 +9701,11 @@ Game_Interpreter.prototype.command140 = function() {
 Game_Interpreter.prototype.command201 = function() {
     if (!$gameParty.inBattle() && !$gameMessage.isBusy()) {
         var mapId, x, y;
-        if (this._params[0] === 0) { // Direct designation
+        if (this._params[0] === 0) {  // Direct designation
             mapId = this._params[1];
             x = this._params[2];
             y = this._params[3];
-        } else { // Designation with variables
+        } else {  // Designation with variables
             mapId = $gameVariables.value(this._params[1]);
             x = $gameVariables.value(this._params[2]);
             y = $gameVariables.value(this._params[3]);
@@ -9877,11 +9720,11 @@ Game_Interpreter.prototype.command201 = function() {
 // Set Vehicle Location
 Game_Interpreter.prototype.command202 = function() {
     var mapId, x, y;
-    if (this._params[1] === 0) { // Direct designation
+    if (this._params[1] === 0) {  // Direct designation
         mapId = this._params[2];
         x = this._params[3];
         y = this._params[4];
-    } else { // Designation with variables
+    } else {  // Designation with variables
         mapId = $gameVariables.value(this._params[2]);
         x = $gameVariables.value(this._params[3]);
         y = $gameVariables.value(this._params[4]);
@@ -9897,13 +9740,13 @@ Game_Interpreter.prototype.command202 = function() {
 Game_Interpreter.prototype.command203 = function() {
     var character = this.character(this._params[0]);
     if (character) {
-        if (this._params[1] === 0) { // Direct designation
+        if (this._params[1] === 0) {  // Direct designation
             character.locate(this._params[2], this._params[3]);
-        } else if (this._params[1] === 1) { // Designation with variables
+        } else if (this._params[1] === 1) {  // Designation with variables
             var x = $gameVariables.value(this._params[2]);
             var y = $gameVariables.value(this._params[3]);
             character.locate(x, y);
-        } else { // Exchange with another event
+        } else {  // Exchange with another event
             var character2 = this.character(this._params[2]);
             if (character2) {
                 character.swap(character2);
@@ -10061,10 +9904,10 @@ Game_Interpreter.prototype.command230 = function() {
 // Show Picture
 Game_Interpreter.prototype.command231 = function() {
     var x, y;
-    if (this._params[3] === 0) { // Direct designation
+    if (this._params[3] === 0) {  // Direct designation
         x = this._params[4];
         y = this._params[5];
-    } else { // Designation with variables
+    } else {  // Designation with variables
         x = $gameVariables.value(this._params[4]);
         y = $gameVariables.value(this._params[5]);
     }
@@ -10076,10 +9919,10 @@ Game_Interpreter.prototype.command231 = function() {
 // Move Picture
 Game_Interpreter.prototype.command232 = function() {
     var x, y;
-    if (this._params[3] === 0) { // Direct designation
+    if (this._params[3] === 0) {  // Direct designation
         x = this._params[4];
         y = this._params[5];
-    } else { // Designation with variables
+    } else {  // Designation with variables
         x = $gameVariables.value(this._params[4]);
         y = $gameVariables.value(this._params[5]);
     }
@@ -10212,11 +10055,19 @@ Game_Interpreter.prototype.command281 = function() {
 // Change Tileset
 Game_Interpreter.prototype.command282 = function() {
     var tileset = $dataTilesets[this._params[0]];
-    for (var i = 0; i < tileset.tilesetNames.length; i++) {
-        ImageManager.loadTileset(tileset.tilesetNames[i]);
+    if(!this._imageReservationId){
+        this._imageReservationId = Utils.generateRuntimeId();
     }
-    if (ImageManager.isReady()) {
+
+    var allReady = tileset.tilesetNames.map(function(tilesetName) {
+        return ImageManager.reserveTileset(tilesetName, 0, this._imageReservationId);
+    }, this).every(function(bitmap) {return bitmap.isReady();});
+
+    if (allReady) {
         $gameMap.changeTileset(this._params[0]);
+        ImageManager.releaseReservation(this._imageReservationId);
+        this._imageReservationId = null;
+
         return true;
     } else {
         return false;
@@ -10239,29 +10090,29 @@ Game_Interpreter.prototype.command284 = function() {
 // Get Location Info
 Game_Interpreter.prototype.command285 = function() {
     var x, y, value;
-    if (this._params[2] === 0) { // Direct designation
+    if (this._params[2] === 0) {  // Direct designation
         x = this._params[3];
         y = this._params[4];
-    } else { // Designation with variables
+    } else {  // Designation with variables
         x = $gameVariables.value(this._params[3]);
         y = $gameVariables.value(this._params[4]);
     }
     switch (this._params[1]) {
-        case 0: // Terrain Tag
-            value = $gameMap.terrainTag(x, y);
-            break;
-        case 1: // Event ID
-            value = $gameMap.eventIdXy(x, y);
-            break;
-        case 2: // Tile ID (Layer 1)
-        case 3: // Tile ID (Layer 2)
-        case 4: // Tile ID (Layer 3)
-        case 5: // Tile ID (Layer 4)
-            value = $gameMap.tileId(x, y, this._params[1] - 2);
-            break;
-        default: // Region ID
-            value = $gameMap.regionId(x, y);
-            break;
+    case 0:     // Terrain Tag
+        value = $gameMap.terrainTag(x, y);
+        break;
+    case 1:     // Event ID
+        value = $gameMap.eventIdXy(x, y);
+        break;
+    case 2:     // Tile ID (Layer 1)
+    case 3:     // Tile ID (Layer 2)
+    case 4:     // Tile ID (Layer 3)
+    case 5:     // Tile ID (Layer 4)
+        value = $gameMap.tileId(x, y, this._params[1] - 2);
+        break;
+    default:    // Region ID
+        value = $gameMap.regionId(x, y);
+        break;
     }
     $gameVariables.setValue(this._params[0], value);
     return true;
@@ -10271,11 +10122,11 @@ Game_Interpreter.prototype.command285 = function() {
 Game_Interpreter.prototype.command301 = function() {
     if (!$gameParty.inBattle()) {
         var troopId;
-        if (this._params[0] === 0) { // Direct designation
+        if (this._params[0] === 0) {  // Direct designation
             troopId = this._params[1];
-        } else if (this._params[0] === 1) { // Designation with a variable
+        } else if (this._params[0] === 1) {  // Designation with a variable
             troopId = $gameVariables.value(this._params[1]);
-        } else { // Same as Random Encounter
+        } else {  // Same as Random Encounter
             troopId = $gamePlayer.makeEncounterTroopId();
         }
         if ($dataTroops[troopId]) {
@@ -10569,13 +10420,13 @@ Game_Interpreter.prototype.command336 = function() {
 // Show Battle Animation
 Game_Interpreter.prototype.command337 = function() {
     if (this._params[2] == true) {
-        this.iterateEnemyIndex(-1, function(enemy) {
+        this.iterateEnemyIndex(-1,function(enemy) {
             if (enemy.isAlive()) {
-                enemy.startAnimation(this._params[1], false, 0);
+                enemy.startAnimation(this._params[1],false,0);
             }
         }.bind(this));
     } else {
-        this.iterateEnemyIndex(this._params[0], function(enemy) {
+        this.iterateEnemyIndex(this._params[0], function (enemy) {
             if (enemy.isAlive()) {
                 enemy.startAnimation(this._params[1], false, 0);
             }
@@ -10652,4 +10503,131 @@ Game_Interpreter.prototype.command356 = function() {
 
 Game_Interpreter.prototype.pluginCommand = function(command, args) {
     // to be overridden by plugins
+};
+
+Game_Interpreter.requestImages = function(list, commonList){
+    if(!list) return;
+
+    list.forEach(function(command){
+        var params = command.parameters;
+        switch(command.code){
+            // Show Text
+            case 101:
+                ImageManager.requestFace(params[0]);
+                break;
+
+            // Common Event
+            case 117:
+                var commonEvent = $dataCommonEvents[params[0]];
+                if (commonEvent) {
+                    if (!commonList) {
+                        commonList = [];
+                    }
+                    if (!commonList.contains(params[0])) {
+                        commonList.push(params[0]);
+                        Game_Interpreter.requestImages(commonEvent.list, commonList);
+                    }
+                }
+                break;
+
+            // Change Party Member
+            case 129:
+                var actor = $gameActors.actor(params[0]);
+                if (actor && params[1] === 0) {
+                    var name = actor.characterName();
+                    ImageManager.requestCharacter(name);
+                }
+                break;
+
+            // Set Movement Route
+            case 205:
+                if(params[1]){
+                    params[1].list.forEach(function(command){
+                        var params = command.parameters;
+                        if(command.code === Game_Character.ROUTE_CHANGE_IMAGE){
+                            ImageManager.requestCharacter(params[0]);
+                        }
+                    });
+                }
+                break;
+
+            // Show Animation, Show Battle Animation
+            case 212: case 337:
+                if(params[1]) {
+                    var animation = $dataAnimations[params[1]];
+                    var name1 = animation.animation1Name;
+                    var name2 = animation.animation2Name;
+                    var hue1 = animation.animation1Hue;
+                    var hue2 = animation.animation2Hue;
+                    ImageManager.requestAnimation(name1, hue1);
+                    ImageManager.requestAnimation(name2, hue2);
+                }
+                break;
+
+            // Change Player Followers
+            case 216:
+                if (params[0] === 0) {
+                    $gamePlayer.followers().forEach(function(follower) {
+                        var name = follower.characterName();
+                        ImageManager.requestCharacter(name);
+                    });
+                }
+                break;
+
+            // Show Picture
+            case 231:
+                ImageManager.requestPicture(params[1]);
+                break;
+
+            // Change Tileset
+            case 282:
+                var tileset = $dataTilesets[params[0]];
+                tileset.tilesetNames.forEach(function(tilesetName){
+                    ImageManager.requestTileset(tilesetName);
+                });
+                break;
+
+            // Change Battle Back
+            case 283:
+                if ($gameParty.inBattle()) {
+                    ImageManager.requestBattleback1(params[0]);
+                    ImageManager.requestBattleback2(params[1]);
+                }
+                break;
+
+            // Change Parallax
+            case 284:
+                if (!$gameParty.inBattle()) {
+                    ImageManager.requestParallax(params[0]);
+                }
+                break;
+
+            // Change Actor Images
+            case 322:
+                ImageManager.requestCharacter(params[1]);
+                ImageManager.requestFace(params[3]);
+                ImageManager.requestSvActor(params[5]);
+                break;
+
+            // Change Vehicle Image
+            case 323:
+                var vehicle = $gameMap.vehicle(params[0]);
+                if(vehicle){
+                    ImageManager.requestCharacter(params[1]);
+                }
+                break;
+
+            // Enemy Transform
+            case 336:
+                var enemy = $dataEnemies[params[1]];
+                var name = enemy.battlerName;
+                var hue = enemy.battlerHue;
+                if ($gameSystem.isSideView()) {
+                    ImageManager.requestSvEnemy(name, hue);
+                } else {
+                    ImageManager.requestEnemy(name, hue);
+                }
+                break;
+        }
+    });
 };
