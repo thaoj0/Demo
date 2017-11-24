@@ -577,6 +577,13 @@ Game_Actor.prototype.maxBattleSkills = function() {
 };
 
 Game_Actor.prototype.battleSkills = function() {
+    var weapskills = [];
+    this._skills.concat(this.addedSkills()).forEach(function(id) {
+        if (!weapskills.contains($dataSkills[id])) {
+            weapskills.push($dataSkills[id]);
+        }
+    });
+    weapskills = weapskills.filter(function(x){return x.stypeId==1});
     if (this._battleSkills === undefined) this.clearEquipBattleSkills();
     if (!$gameParty.inBattle()) this.clearUnequippableSkills();
     var skills = [];
@@ -591,6 +598,8 @@ Game_Actor.prototype.battleSkills = function() {
       if (this._battleSkills.length <= this.maxBattleSkills()) break;
       this._battleSkills.pop();
     }
+    skills = skills.concat(weapskills);
+    //return skills.filter(Yanfly.Util.onlyUnique);
     return skills;
 };
 

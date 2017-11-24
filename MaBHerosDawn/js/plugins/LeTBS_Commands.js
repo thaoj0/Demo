@@ -339,7 +339,7 @@ Window_TBSSkillList.prototype.updateHelp = function () {
 Window_TBSSkillList.prototype.selectLast = function () {
     var skill = BattleManagerTBS.activeAction().item();
     var index = this._data.indexOf(skill);
-    this.select(index >= 0 ? index : 0);
+    this.select(0);//index >= 0 ? index : 0);
     this.updateHelp();
 };
 

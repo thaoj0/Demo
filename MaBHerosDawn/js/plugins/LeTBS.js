@@ -7704,6 +7704,10 @@ TBSEntity.prototype.onDeath = function () {
     else
         this.startSequence("dead");
     BattleManagerTBS.onEntityDeath(this);
+    //this.setPosition(0,0);
+    //this.destroy();
+    BattleManagerTBS.wait(60);
+    BattleManagerTBS.destroyEntity(this);
 };
 
 TBSEntity.prototype.onRevive = function () {
@@ -7738,6 +7742,7 @@ TBSEntity.prototype.checkMouseEvents = function () {
 };
 
 TBSEntity.prototype.isMouseOverMe = function () {
+    return false;
     var data = TouchInput._leTBSMoveData;
     return this._sprite.getBounds().contains(data.x, data.y);
 };
@@ -9938,4 +9943,181 @@ TBS_FloatingAction.prototype.setSubject = function (subject) {
 
 TBS_FloatingAction.prototype.subject = function () {
     return this._subject;
+};
+
+//-------------------------------------------------------------------------
+// MAB's Edits: Movement uses TP instead of Move points luk = move cost
+//-------------------------------------------------------------------------
+TBSEntity.prototype.onCellCovered = function () {
+    var stop = BattleManagerTBS.executeEventsByStep(this);
+    // When returning true, the movement is stoped
+    this._movingNextCell = null;
+    if (this._moveReducePoints) {
+        //this._movePoints--;
+        this.battler().gainTp(-this.battler().luk);
+        if (this.getMovePoints() === 0)
+            return true;
+    }
+    return stop;
+};
+
+TBSEntity.prototype.applyObjChangeMovePoints = function (obj) {
+    var value = obj.leTbs_changeMovePoints;
+    var nbr = value.match("%") ? Number(value.replace("%", "")) * 0.01 * this.getMovePoints() : Number(value);
+    this.changeMovePoints(nbr);
+},
+
+    TBSEntity.prototype.changeMovePoints = function (plus) {
+        this._movePoints += plus;
+    };
+
+TBSEntity.prototype.getMovePoints = function () {
+    if (this.oneTimeMove() && this._movePerformed) return 0;
+    var calTP = this.battler().tp / this.battler().luk; 
+    if (this.playableByAI()){ // An AI will never spend more than 1/3 of TP on move
+        calTP /= 3;
+    }
+    return calTP.clamp(0,Math.floor(calTP));
+    //return this._movePoints.clamp(0, this._movePoints);
+};
+
+Game_Battler.prototype.gainSilentTp = function(value) {
+    this.setTp(this.tp + value);
+};
+
+Game_Battler.prototype.initTp = function() {
+    this.setTp(50);
+};
+
+Game_Battler.prototype.chargeTpByDamage = function(damageRate) {
+};
+
+//-------------------------------------------------------------------------
+// MAB's Edits: (Hit - Evade = Dodge) (Evade - Hit = Critical)
+//-------------------------------------------------------------------------
+
+Game_Action.prototype.itemCnt = function(target) {
+    if (target.canMove()) { // All attacks can be countered
+        return target.cnt;
+    } else {
+        return 0;
+    }
+};
+
+Game_Action.prototype.itemMrf = function(target) {
+    if (this.isMagical()) {
+        return target.mrf;
+    } else {
+        return 0;
+    }
+};
+
+Game_Action.prototype.itemHit = function(target) {
+    if (this.isPhysical() && target.attackedFrom()!="back") {
+        return (this.item().successRate * 0.01) + (this.subject().hit - target.eva);
+    } else {
+        return this.item().successRate * 0.01; // success rate = hit rate if from back
+    }
+};
+
+Game_Action.prototype.itemEva = function(target) {
+    if (this.isPhysical()) {
+        return target.eva;
+    } else if (this.isMagical()) {
+        return target.mev;
+    } else {
+        return 0;
+    }
+};
+
+Game_Action.prototype.itemCri = function(target) {
+    //console.log(target.attackedFrom()+':'+this.subject().hit - target.eva);
+    if (this.item().damage.critical) {
+        if (target.attackedFrom()!="back") {
+            return this.subject().hit - target.eva;
+        } else {
+            return this.subject().hit; // hit rate = crit rate if from back
+        }
+    } else {
+        return 0;
+    }
+};
+
+Game_Action.prototype.lukEffectRate = function(target) {
+    if (target.result().critical){
+        return Math.max(this.subject().tcr, 0.0);  
+    }
+};
+
+Game_Action.prototype.applyCritical = function(damage) {
+    return damage * this.subject().tcr;
+};
+
+Lecode.S_TBS.origGameBattler_initMembers = Game_Battler.prototype.initMembers;
+Game_Battler.prototype.initMembers = function () {
+    Lecode.S_TBS.origGameBattler_initMembers.call(this);
+    this._attackedfrom = "";
+};
+
+Game_Battler.prototype.attackedFrom = function(){
+    return this._attackedfrom;
+}
+
+Game_Battler.prototype.setAttackedFrom = function(direction){
+    this._attackedfrom = direction;
+}
+
+Lecode.S_TBS.oldprepareDirectionalDamageBonus = BattleManagerTBS.prepareDirectionalDamageBonus;
+BattleManagerTBS.prepareDirectionalDamageBonus = function (user, targets, item) {
+    Lecode.S_TBS.oldprepareDirectionalDamageBonus.call(this, user, targets, item);
+    this.setAttackDirection(user, targets);
+};
+
+Lecode.S_TBS.oldResetDirectionalDamageBonus = BattleManagerTBS.resetDirectionalDamageBonus;
+BattleManagerTBS.resetDirectionalDamageBonus = function (targets) {
+    Lecode.S_TBS.oldResetDirectionalDamageBonus.call(this, targets);
+    for (var i = 0; i < targets.length; i++) {
+        targets[i].battler().attackedfrom = "";
+    }
+};
+
+BattleManagerTBS.setAttackDirection = function (user, targets) {
+    var oldUserDir = user.getDir();
+    targets.forEach(loop);
+    function loop(target){
+        if ( target !== user){ // && !target.getCell().isSame(user) ){
+            var tardir = target.getDir();
+            var userdir = user.getDir();
+            user.lookAt(target.getCell());
+            if (userdir === tardir) {
+                target.battler().setAttackedFrom("back");
+            } else if (userdir === 2 && tardir === 8 || userdir === 8 && tardir === 2 ||
+                userdir === 4 && tardir === 6 || userdir === 6 && tardir === 4) {
+                target.battler().setAttackedFrom("front");
+            } else {
+                target.battler().setAttackedFrom("side");
+            }
+        }
+    }
+    user.setDir(oldUserDir);
+};
+
+Game_BattlerBase.prototype.counterSkillId = function() {
+    return 13;
+};
+
+BattleManagerTBS.processCounterAttack = function (targets, subject, action) {
+    if (!action) return;
+    this.setCursorCell(subject.getCell());
+    targets.forEach(function (entity) {
+        var dist = LeUtilities.distanceBetweenCells(subject.getCell(), entity.getCell());
+        if (dist <= 1 && !LeUtilities.isAlly(subject.battler(), entity.battler())
+            && Math.random() < action.itemCnt(entity.battler()) ) {
+            var skill = $dataSkills[entity.battler().counterSkillId()];
+            entity.lookAt(subject.getCell());
+            entity.addTextPopup("Counter");
+            entity.startSequence("counter");
+            entity.executeAction(skill);
+        }
+    }.bind(this));
 };

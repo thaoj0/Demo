@@ -473,8 +473,9 @@ Window_TBSStatus.prototype.refresh = function () {
     this.drawActorMp(this._entity.battler(), x, y, 130);
     //- TP Gauge
     if (Lecode.S_TBS.Windows.statusWindowShowTP) {
-        y += this.lineHeight() / 4 + 4;
-        this._gaugeHeight = 6;
+        //y += this.lineHeight() / 4 + 4;
+        y += this.lineHeight() - 8;
+        //this._gaugeHeight = 6;
         this.drawActorTp(this._entity.battler(), x, y, 130);
     }
     //- Move Points
@@ -491,7 +492,43 @@ Window_TBSStatus.prototype.refresh = function () {
     // - States
     x = 2;
     var max = Lecode.S_TBS.Windows.statusWindowMaxStates;
-    this.drawActorIcons(this._entity.battler(), x, y, Window_Base._iconWidth * max);
+    //this.drawActorIcons(this._entity.battler(), x, y, Window_Base._iconWidth * max);
+    y += this.lineHeight() - 8;
+    y += this.lineHeight() - 8;
+    this.S_TBSdrawActorIcons(this._entity.battler(), x, y, Window_Base._iconWidth * max);
+    y += this.lineHeight()*2 - 16;
+    this.drawTextEx("HIT", x, y);
+    this.drawTextEx(this._entity.battler().hit.toString(), x + 130, y);
+    
+    y += this.lineHeight()*2 - 16;
+    this.drawTextEx("EVA", x, y);
+    this.drawTextEx(this._entity.battler().eva.toString(), x + 130, y);
+    
+    y += this.lineHeight()*2 - 16;
+    this.drawTextEx("TRG", x, y);
+    this.drawTextEx(this._entity.battler().trg.toString(), x + 130, y);
+    //this.drawBasicInfo(this._entity.battler(), x, y);
+};
+
+Window_Base.prototype.S_TBSdrawActorIcons = function(actor, x, y, width) {
+    width = width || 144;
+    var icons = actor.allIcons().slice(0, Math.floor(width / Window_Base._iconWidth));
+    var z = this.lineHeight();
+    for (var i = 0; i < icons.length; i++) {
+        if (i>7){
+            z = (this.lineHeight())*2;
+            this.drawIcon(icons[i], x + Window_Base._iconWidth * (i-8), y + 2 + z);
+        }else{
+            this.drawIcon(icons[i], x + Window_Base._iconWidth * i, y + 2 + z);
+        }
+    }
+};
+
+Window_Base.prototype.drawBasicInfo = function(actor, x, y) {
+    var lineHeight = this.lineHeight();
+    this.drawActorIcons(actor, x, y + lineHeight * 1);
+    this.drawActorHp(actor, x, y + lineHeight * 2);
+    this.drawActorMp(actor, x, y + lineHeight * 3);
 };
 
 Window_TBSStatus.prototype.drawSprite = function () {
@@ -505,10 +542,18 @@ Window_TBSStatus.prototype.drawSprite = function () {
 };
 
 Window_TBSStatus.prototype.drawActorTp = function (actor, x, y, width) {
+//    width = width || 96;
+//    var color1 = this.tpGaugeColor1();
+//    var color2 = this.tpGaugeColor2();
+//    this.drawGauge(x, y, width, actor.tpRate(), color1, color2);
     width = width || 96;
     var color1 = this.tpGaugeColor1();
     var color2 = this.tpGaugeColor2();
     this.drawGauge(x, y, width, actor.tpRate(), color1, color2);
+    this.changeTextColor(this.systemColor());
+    this.drawText(TextManager.tpA, x, y, 44);
+    this.drawCurrentAndMax(actor.tp, actor.maxTp(), x, y, width,
+                           this.tpColor(actor), this.normalColor());
 };
 
 Window_TBSStatus.prototype.gaugeHeight = function () {
@@ -519,7 +564,7 @@ Window_TBSStatus.prototype.gaugeHeight = function () {
 /*-------------------------------------------------------------------------
 * Window_TBSSkillList
 -------------------------------------------------------------------------*/
-// This requires YEP_EquipBattleSkills.js
+// This requires YEP_EquipBattleSkills.js. This makes the skills into battleSkills
 Window_SkillList.prototype.makeItemList = function() {
     if (this._actor) {
         this._data = this._actor.battleSkills().filter(function(item) {

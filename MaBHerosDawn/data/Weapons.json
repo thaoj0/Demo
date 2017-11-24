@@ -1,13 +1,13 @@
 [
 null,
-{"id":1,"animationId":6,"description":"","etypeId":1,"traits":[{"code":31,"dataId":1,"value":0},{"code":22,"dataId":0,"value":0}],"iconIndex":97,"name":"Sword","note":"","params":[50,0,1,0,0,0,0,0],"price":500,"wtypeId":2},
-{"id":2,"animationId":6,"description":"","etypeId":1,"traits":[{"code":31,"dataId":1,"value":0},{"code":22,"dataId":0,"value":0}],"iconIndex":99,"name":"Axe","note":"<letbs_commands>\nskill[18], skill[20]\n</letbs_commands>","params":[0,0,1,0,0,0,0,0],"price":500,"wtypeId":4},
-{"id":3,"animationId":1,"description":"","etypeId":1,"traits":[{"code":31,"dataId":1,"value":0},{"code":22,"dataId":0,"value":0}],"iconIndex":101,"name":"Cane","note":"<letbs_commands>\nskill[19]\n</letbs_commands>","params":[0,0,1,0,0,0,0,0],"price":500,"wtypeId":6},
-{"id":4,"animationId":11,"description":"","etypeId":1,"traits":[{"code":31,"dataId":1,"value":0},{"code":22,"dataId":0,"value":0}],"iconIndex":102,"name":"Bow","note":"<letbs>\nscope: circle(4,2)\nsequence: bow\n</letbs>","params":[0,0,1,0,0,0,0,0],"price":500,"wtypeId":7},
-{"id":5,"animationId":0,"description":"","etypeId":1,"traits":[{"code":31,"dataId":1,"value":0},{"code":22,"dataId":0,"value":0}],"iconIndex":0,"name":"","note":"","params":[0,0,0,0,0,0,0,0],"price":0,"wtypeId":0},
-{"id":6,"animationId":0,"description":"","etypeId":1,"traits":[{"code":31,"dataId":1,"value":0},{"code":22,"dataId":0,"value":0}],"iconIndex":0,"name":"","note":"","params":[0,0,0,0,0,0,0,0],"price":0,"wtypeId":0},
-{"id":7,"animationId":0,"description":"","etypeId":1,"traits":[{"code":31,"dataId":1,"value":0},{"code":22,"dataId":0,"value":0}],"iconIndex":0,"name":"","note":"","params":[0,0,0,0,0,0,0,0],"price":0,"wtypeId":0},
-{"id":8,"animationId":0,"description":"","etypeId":1,"traits":[{"code":31,"dataId":1,"value":0},{"code":22,"dataId":0,"value":0}],"iconIndex":0,"name":"","note":"","params":[0,0,0,0,0,0,0,0],"price":0,"wtypeId":0},
-{"id":9,"animationId":0,"description":"","etypeId":1,"traits":[{"code":31,"dataId":1,"value":0},{"code":22,"dataId":0,"value":0}],"iconIndex":0,"name":"","note":"","params":[0,0,0,0,0,0,0,0],"price":0,"wtypeId":0},
-{"id":10,"animationId":0,"description":"","etypeId":1,"traits":[{"code":31,"dataId":1,"value":0},{"code":22,"dataId":0,"value":0}],"iconIndex":0,"name":"","note":"","params":[0,0,0,0,0,0,0,0],"price":0,"wtypeId":0}
+{"id":1,"animationId":6,"description":"Excellent back attacks.","etypeId":1,"traits":[],"iconIndex":150,"name":"Dagger","note":"<Passive State: 23>","params":[0,0,1,0,0,0,0,0],"price":500,"wtypeId":1},
+{"id":2,"animationId":6,"description":"Allows combo attacks.","etypeId":1,"traits":[],"iconIndex":147,"name":"Long Sword","note":"","params":[0,0,1,0,0,0,0,0],"price":500,"wtypeId":1},
+{"id":3,"animationId":6,"description":"Impressive area swings.","etypeId":1,"traits":[],"iconIndex":389,"name":"Great Sword","note":"","params":[0,0,1,0,0,0,0,0],"price":500,"wtypeId":1},
+{"id":4,"animationId":7,"description":"Excels at mid range.","etypeId":1,"traits":[],"iconIndex":155,"name":"Scythe","note":"<letbs>\nscope: circle(4,2)\nsequence: bow\n</letbs>","params":[0,0,1,0,0,0,0,0],"price":500,"wtypeId":1},
+{"id":5,"animationId":11,"description":"Impressive piercing ability.","etypeId":1,"traits":[],"iconIndex":146,"name":"Polearm","note":"","params":[0,0,0,0,0,0,0,0],"price":0,"wtypeId":1},
+{"id":6,"animationId":1,"description":"Summons magical attacks.","etypeId":1,"traits":[],"iconIndex":152,"name":"Staff","note":"","params":[0,0,0,0,0,0,0,0],"price":0,"wtypeId":1},
+{"id":7,"animationId":1,"description":"Charging capabilities.","etypeId":1,"traits":[],"iconIndex":982,"name":"Mace","note":"","params":[0,0,0,0,0,0,0,0],"price":0,"wtypeId":1},
+{"id":8,"animationId":29,"description":"Allows long range combat.","etypeId":1,"traits":[],"iconIndex":149,"name":"Bow","note":"<letbs>\nscope: circle(4,2)\nsequence: bow\n</letbs>","params":[0,0,0,0,0,0,0,0],"price":0,"wtypeId":1},
+{"id":9,"animationId":111,"description":"Fires magical projectiles.","etypeId":1,"traits":[],"iconIndex":976,"name":"Firearm","note":"","params":[0,0,0,0,0,0,0,0],"price":0,"wtypeId":1},
+{"id":10,"animationId":1,"description":"Made for blocking.","etypeId":1,"traits":[],"iconIndex":161,"name":"Shield","note":"","params":[0,0,0,0,0,0,0,0],"price":0,"wtypeId":1}
 ]
