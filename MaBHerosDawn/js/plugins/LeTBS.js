@@ -10043,12 +10043,6 @@ Game_Action.prototype.itemCri = function(target) {
     }
 };
 
-Game_Action.prototype.lukEffectRate = function(target) {
-    if (target.result().critical){
-        return Math.max(this.subject().tcr, 0.0);  
-    }
-};
-
 Game_Action.prototype.applyCritical = function(damage) {
     return damage * this.subject().tcr;
 };
@@ -10103,16 +10097,49 @@ BattleManagerTBS.setAttackDirection = function (user, targets) {
 };
 
 Game_BattlerBase.prototype.counterSkillId = function() {
-    return 13;
+    return 1;
 };
+
+TBSEntity.prototype.initialize = function (battler, layer) {
+    this._counterable = true;
+    this._battler = battler;
+    this._cell = null;
+    this._cellX = 0;
+    this._cellY = 0;
+    this._moving = false;
+    this._movePoints = 0;
+    this._movingDistance = [0, 0];
+    this._movePath = [];
+    this._movingNextCell = null;
+    this._moveReducePoints = false;
+    this._movePerformed = false;
+    this._actionPerformed = false;
+    this._dead = false;
+    this._flag = null;
+    this._isMouseOver = false;
+    this.createSprite(battler, layer);
+    this.createSpriteValues();
+    this.createComponents();
+    this.setMovePoints();
+    this.initializeSpeed();
+};
+
+TBSEntity.prototype.setCounterable = function(that){
+    this._counterable = that;
+}
+
+TBSEntity.prototype.getCounterable = function(){
+    return this._counterable;
+}
 
 BattleManagerTBS.processCounterAttack = function (targets, subject, action) {
     if (!action) return;
     this.setCursorCell(subject.getCell());
-    targets.forEach(function (entity) {
+    targets.forEach(function (entity) { // This means each target hit process counter chance
         var dist = LeUtilities.distanceBetweenCells(subject.getCell(), entity.getCell());
-        if (dist <= 1 && !LeUtilities.isAlly(subject.battler(), entity.battler())
-            && Math.random() < action.itemCnt(entity.battler()) ) {
+        if (subject.getCounterable() && 
+            dist <= 1 && !LeUtilities.isAlly(subject.battler(), entity.battler()) &&
+            Math.random() < action.itemCnt(entity.battler()) ) {// counter checks fix
             var skill = $dataSkills[entity.battler().counterSkillId()];
             entity.lookAt(subject.getCell());
             entity.addTextPopup("Counter");

@@ -567,7 +567,7 @@ Window_TBSStatus.prototype.gaugeHeight = function () {
 // This requires YEP_EquipBattleSkills.js. This makes the skills into battleSkills
 Window_SkillList.prototype.makeItemList = function() {
     if (this._actor) {
-        this._data = this._actor.battleSkills().filter(function(item) {
+        this._data = this._actor.skills().filter(function(item) {
             return this.includes(item);
         }, this);
     } else {
