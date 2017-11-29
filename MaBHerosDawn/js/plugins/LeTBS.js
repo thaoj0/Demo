@@ -3272,7 +3272,7 @@ BattleManagerTBS.processCounterAttack = function (targets, subject, action) {
 BattleManagerTBS.invokeObjEffects = function (user, item, targets, hitAnim, animDelay) {
     this.activeAction().setItemObject(item);
     this.prepareDirectionalDamageBonus(user, targets, item);
-    this.applyObjEffects(user, targets, hitAnim, animDelay);
+    this.applyObjEffects(user, targets, hitAnim, animDelay); 
     this.resetDirectionalDamageBonus(targets);
     this.refreshBattlersStatus();
 };
@@ -6386,10 +6386,13 @@ TBSSequenceManager.prototype.commandEffects = function (param) {
             hitAnim = BattleManagerTBS.activeEntity().getAttackAnimation();
         else
             hitAnim = BattleManagerTBS.activeAction().item().animationId;
-    }
+    }// YEP
     BattleManagerTBS.invokeObjEffects(this.getUser(), obj, targets, hitAnim, animDelay);
+    //BattleManagerTBS.invokeObjEffects(this.getUser(), obj, targets, hitAnim, animDelay);
+    //BattleManagerTBS.invokeObjEffects(this.getUser(), obj, targets, hitAnim, animDelay);
+    //BattleManagerTBS.invokeObjEffects(this.getUser(), obj, targets, hitAnim, animDelay);
+    console.log($dataSkills[BattleManagerTBS.activeAction().item().id].repeats);
     this._affectedTargets = this._affectedTargets.concat(targets);
-
     this._waitRequested = wait;
 };
 
@@ -6854,8 +6857,7 @@ TBSSequenceManager.prototype.commandAskCall = function (param) {
 TBSSequenceManager.prototype.commandUseSkill = function (param) {
     var targetData = param[0];
     var skillId = param[1];
-    var targets = this.readTargets(targetData);
-
+    var targets = this.readTargets(targetData);  
     for (var i = 0; i < targets.length; i++) {
         targets[i].forceAction(skillId);
     }
@@ -10021,13 +10023,13 @@ Game_Action.prototype.itemHit = function(target) {
 };
 
 Game_Action.prototype.itemEva = function(target) {
-    if (this.isPhysical()) {
+    /*if (this.isPhysical()) {
         return target.eva;
     } else if (this.isMagical()) {
         return target.mev;
     } else {
         return 0;
-    }
+    }*/return 0;
 };
 
 Game_Action.prototype.itemCri = function(target) {
@@ -10059,6 +10061,16 @@ Game_Battler.prototype.attackedFrom = function(){
 
 Game_Battler.prototype.setAttackedFrom = function(direction){
     this._attackedfrom = direction;
+}
+
+Game_Action.prototype.itemBlock = function(target, value){ 
+    if (this.isPhysical() && Math.random() < target.eva) {
+        target.addTextPopup("Blocked");
+        target.startSequence("counter");   
+        return 0;
+    } else {
+        return value;
+    }
 }
 
 Lecode.S_TBS.oldprepareDirectionalDamageBonus = BattleManagerTBS.prepareDirectionalDamageBonus;
@@ -10124,21 +10136,12 @@ TBSEntity.prototype.initialize = function (battler, layer) {
     this.initializeSpeed();
 };
 
-TBSEntity.prototype.setCounterable = function(that){
-    this._counterable = that;
-}
-
-TBSEntity.prototype.getCounterable = function(){
-    return this._counterable;
-}
-
 BattleManagerTBS.processCounterAttack = function (targets, subject, action) {
     if (!action) return;
     this.setCursorCell(subject.getCell());
-    targets.forEach(function (entity) { // This means each target hit process counter chance
+    targets.forEach(function (entity) { // Counters can be countered
         var dist = LeUtilities.distanceBetweenCells(subject.getCell(), entity.getCell());
-        if (subject.getCounterable() && 
-            dist <= 1 && !LeUtilities.isAlly(subject.battler(), entity.battler()) &&
+        if (dist <= 1 && !LeUtilities.isAlly(subject.battler(), entity.battler()) &&
             Math.random() < action.itemCnt(entity.battler()) ) {// counter checks fix
             var skill = $dataSkills[entity.battler().counterSkillId()];
             entity.lookAt(subject.getCell());

@@ -562,7 +562,7 @@ Lecode.S_TBS.Config.Sequences = {
         "anim: user, 177, 0, true",
         "wait: 15"
     ],
-
+    
     "summon": [
         "call: pre-skill",
         "map_anim: {aoe}, obj_anim",
