@@ -9983,12 +9983,16 @@ TBSEntity.prototype.getMovePoints = function () {
     //return this._movePoints.clamp(0, this._movePoints);
 };
 
+Game_BattlerBase.prototype.maxTp = function() {
+    return 20;
+};
+
 Game_Battler.prototype.gainSilentTp = function(value) {
     this.setTp(this.tp + value);
 };
 
 Game_Battler.prototype.initTp = function() {
-    this.setTp(50);
+    this.setTp(10);
 };
 
 Game_Battler.prototype.chargeTpByDamage = function(damageRate) {
