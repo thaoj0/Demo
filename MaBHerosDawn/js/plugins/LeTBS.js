@@ -10116,30 +10116,6 @@ Game_BattlerBase.prototype.counterSkillId = function() {
     return 1;
 };
 
-TBSEntity.prototype.initialize = function (battler, layer) {
-    this._counterable = true;
-    this._battler = battler;
-    this._cell = null;
-    this._cellX = 0;
-    this._cellY = 0;
-    this._moving = false;
-    this._movePoints = 0;
-    this._movingDistance = [0, 0];
-    this._movePath = [];
-    this._movingNextCell = null;
-    this._moveReducePoints = false;
-    this._movePerformed = false;
-    this._actionPerformed = false;
-    this._dead = false;
-    this._flag = null;
-    this._isMouseOver = false;
-    this.createSprite(battler, layer);
-    this.createSpriteValues();
-    this.createComponents();
-    this.setMovePoints();
-    this.initializeSpeed();
-};
-
 BattleManagerTBS.processCounterAttack = function (targets, subject, action) {
     if (!action) return;
     this.setCursorCell(subject.getCell());
