@@ -25,7 +25,6 @@ Lecode.S_DamageFormula = {};
  * @version 1.0
  *
  * @help
- * See the documentation
  * ============================================================================
  * What is this ?
  * ============================================================================
@@ -51,10 +50,14 @@ Game_Action.prototype.evalDamageFormula = function (target) {
     var b = target;
     this.phyDmg = function (rate) {
         //var rawDmg = (a.atk * 4 - b.def * 2) * rate * 0.01;
+        var rawDmg = a.atk * 2 * rate * 0.01;
+        var reduction = b.def / (b.def + 2 * rawDmg);
         return Math.floor(rawDmg - reduction * rawDmg);
     };
     this.magDmg = function (rate) {
         //var rawDmg = (a.mat * 4 - b.mdf * 2) * rate * 0.01;
+        var rawDmg = a.mat * 2 * rate * 0.01;
+        var reduction = b.mdf / (b.mdf + 2 * rawDmg);
         return Math.floor(rawDmg - reduction * rawDmg);
     };
     return Lecode.S_DamageFormula.oldGameAction_evalDamageFormula.call(this, target);
