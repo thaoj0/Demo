@@ -12,39 +12,46 @@
 # Version History
 #-----------------------------------------------------------------------------
 # - 1.0 : Initial release
-# - 1.1 : Fixed the lazer position on the stack
+# - 1.1 : Fixed the layer position on the stack
 #=============================================================================
 */
 var Lecode = Lecode || {};
 Lecode.S_TBS.TacticalMode = {};
 /*:
- * @plugindesc Render the map following the "tactical mode" of Dofus
+ * @plugindesc Renders the map following the "tactical mode" of Dofus
  * @author Lecode
  * @version 1.1
  *
-* @param Hard Obstacle Color
-* @desc Color for obstacles that blocks the LOS
-* @default #2E2E2E
-*
-* @param Light Obstacle Color
-* @desc Color for obstacles that doesn't block the LOS
-* @default #0
-*
-* @param Free Cell Color
-* @desc Color for free cells
-* @default #898989
-*
-* @param Opacity
-* @desc Drawing Opacity
-* @default 175
-*
-* @param Command Text
-* @desc Command Text
-* @default Tactical Mode
-*
+ * @param Hard Obstacle Color
+ * @desc Color for obstacles that blocks the LOS
+ * @default #2E2E2E
+ *
+ * @param Light Obstacle Color
+ * @desc Color for obstacles that doesn't block the LOS
+ * @default #0
+ *
+ * @param Free Cell Color
+ * @desc Color for free cells
+ * @default #898989
+ *
+ * @param Opacity
+ * @desc Drawing Opacity
+ * @default 175
+ *
+ * @param Command Text
+ * @desc Command Text
+ * @default Tactical Mode
+ *
  *
  * @help
- * ...
+ * ============================================================================
+ * Introduction
+ * ============================================================================
+ *
+ * This plugin adds a command to the "End Commands" window, which is accessible
+ * by pressing esc during a idle turn.
+ * That command renders the map in a epured, neat and special way, following
+ * the Tacical Mode of the MMORPG Dofus.
  */
 //#=============================================================================
 

@@ -3,7 +3,7 @@
 # LeTBS: Skill Bubbles
 # LeTBS_SkillBubble.js
 # By Lecode
-# Version 1.1
+# Version 1.3
 #-----------------------------------------------------------------------------
 # TERMS OF USE
 #-----------------------------------------------------------------------------
@@ -13,7 +13,9 @@
 #-----------------------------------------------------------------------------
 # - 1.0 : Initial release
 # - 1.1 : Correctly positioned to do not obstruct view
-# -     : Can't be off the screen
+#       : Can't be off the screen
+# - 1.2 : Added a tag to disable the skill bubble
+# - 1.3 : Hide the skill bubble by default (it was only closed before)
 #=============================================================================
 */
 var Imported = Imported || {};
@@ -22,12 +24,25 @@ Imported.LeTBS_SkillBubble = true;
 var Lecode = Lecode || {};
 Lecode.S_TBS.SkillBubble = {};
 /*:
- * @plugindesc Draw a window when a skill is used
+ * @plugindesc Display a bubble when a skill is used
  * @author Lecode
- * @version 1.1
+ * @version 1.3
  *
  * @help
- * See the documentation
+ * ============================================================================
+ * Introduction
+ * ============================================================================
+ *
+ * This plugin displays a bubble when a skill is used, showing the name of the
+ * user object.
+ * 
+ * ============================================================================
+ * Disabling The Skill Bubble
+ * ============================================================================
+ *
+ * Skills or items with the instruction 'disable_skill_bubble' won't trigger
+ * the bubble. An actor or enemy with the same instruction won't trigger the bubble for
+ * any of his actions.
  */
 //#=============================================================================
 
@@ -50,7 +65,7 @@ TBSEntity.prototype.createComponents = function () {
 };
 
 Lecode.S_TBS.SkillBubble.oldTBSEntity_update = TBSEntity.prototype.update;
-TBSEntity.prototype.update = function() {
+TBSEntity.prototype.update = function () {
     Lecode.S_TBS.SkillBubble.oldTBSEntity_update.call(this);
     this._skillBubble.updateProcess();
 };
@@ -58,7 +73,8 @@ TBSEntity.prototype.update = function() {
 Lecode.S_TBS.SkillBubble.oldTBSEntity_onActionStart = TBSEntity.prototype.onActionStart;
 TBSEntity.prototype.onActionStart = function (id, fastSequence, action) {
     Lecode.S_TBS.SkillBubble.oldTBSEntity_onActionStart.call(this, id, fastSequence, action);
-    this._skillBubble.set(action.item());
+    if (!(action.item().TagsLetbs.disableSkillBubble || this.battler().hasLeTBSTag("disableSkillBubble")))
+        this._skillBubble.set(action.item());
 };
 
 Lecode.S_TBS.SkillBubble.oldTBSEntity_destroy = TBSEntity.prototype.destroy;
@@ -82,21 +98,22 @@ Window_TBSSkillBubble.prototype.initialize = function (entity) {
     this._item = null;
     Window_Base.prototype.initialize.call(this, 0, 0, 20, 20);
     this.close();
+    this.hide();
 };
 
-Window_TBSSkillBubble.prototype.loadWindowskin = function() {
+Window_TBSSkillBubble.prototype.loadWindowskin = function () {
     this.windowskin = ImageManager.loadSystem('Window2');
 };
 
-Window_TBSSkillBubble.prototype.standardBackOpacity = function() {
+Window_TBSSkillBubble.prototype.standardBackOpacity = function () {
     return 255;
 };
 
-Window_TBSSkillBubble.prototype.standardPadding = function() {
+Window_TBSSkillBubble.prototype.standardPadding = function () {
     return 8;
 };
 
-Window_TBSSkillBubble.prototype.textPadding = function() {
+Window_TBSSkillBubble.prototype.textPadding = function () {
     return 6;
 };
 
@@ -156,8 +173,8 @@ Window_TBSSkillBubble.prototype.updateFade = function () {
 Window_TBSSkillBubble.prototype.refresh = function () {
     this.contents.clear();
     this.resetFontSettings();
-    this.contents._drawTextOutline = function() {};
-    if(!this._item) return;
+    this.contents._drawTextOutline = function () { };
+    if (!this._item) return;
     var name = this._item.name;
     this.contents.fontSize -= 4;
     this.leU_drawText(name, "center", 0);
@@ -168,10 +185,11 @@ Window_TBSSkillBubble.prototype.set = function (item) {
     this._item = item;
     var width = this.windowWidth();
     var height = this.windowHeight();
-    this.move(0,0,width,height);
+    this.move(0, 0, width, height);
     this.createContents();
     this.refresh();
     this.open();
+    this.show();
     this._shakeEffect = {
         power: 2,
         duration: 60

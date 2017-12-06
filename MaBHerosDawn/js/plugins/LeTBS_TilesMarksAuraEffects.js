@@ -3,7 +3,7 @@
 # LeTBS: Tiles, Marks and Aura effects
 # LeTBS_TilesMarksAuraEffects.js
 # By Lecode
-# Version 1.4
+# Version 1.5
 #-----------------------------------------------------------------------------
 # TERMS OF USE
 #-----------------------------------------------------------------------------
@@ -20,6 +20,8 @@
 #       : Fixed a bug where triggering tiles and mark effects change the next
 #         action damage
 # - 1.4 : Added a tile effect to escape battles
+# - 1.5 : Marks and auras can now trigger sequences
+#         Added some tags to set built-in marks and auras
 #=============================================================================
 */
 var Imported = Imported || {};
@@ -30,14 +32,25 @@ Lecode.S_TBS.TilesMarksAura = {};
 /*:
  * @plugindesc Adds tiles, marks and aura effects to the core system
  * @author Lecode
- * @version 1.4
+ * @version 1.5
  *
  * @param Tile Effect Launcher
  * @desc ID of the enemy who launch terrain effects.
  * @default 10
  *
  * @help
- * See the documentation
+ * ============================================================================
+ * Introduction
+ * ============================================================================
+ *
+  * This add-on is too intricate to be described here. Please refer to the online
+ * documentation.
+ * 
+ * ============================================================================
+ * WARNING: Work In Progress
+ * ============================================================================
+ *
+ * The plugin is in WIP state currently. A few features are missing.
  */
 //#=============================================================================
 
@@ -100,7 +113,7 @@ BattleManagerTBS.processTileEffectsWhenTurn = function (entity, occasion) {
 };
 
 BattleManagerTBS.executeTileEffects = function (entity, effect, occasion, code) {
-    if (entity.rpgObject().leTbs_tileEffectsImmune.includes(String(code))) return 0;
+    if (entity.isImmuneToTileEffect(String(code))) return 0;
     if (effect) {
         var occasionFound = false;
         for (var property in effect) {
@@ -224,14 +237,13 @@ BattleManagerTBS.executeMarkEffects = function (mark, entity, occasion) {
             }
         }
     }
-
     if (!occasionFound) return 0;
     var center = entity.getCell().toCoords();
-    var scope = this.getScopeFromData(data.effects_aoe, center, {});
-    var targets = this.getEntitiesInScope(scope);
     var stopMovement = data.stop_movement || false;
     var wait = mark._data.wait || 0;
     if (data.skill_effects) {
+        var scope = this.getScopeFromData(data.effects_aoe, center, {});
+        var targets = this.getEntitiesInScope(scope);
         var id = data.skill_effects;
         var battler = mark._user._battler;
         var obj = $dataSkills[id];
@@ -241,6 +253,10 @@ BattleManagerTBS.executeMarkEffects = function (mark, entity, occasion) {
         this.invokeObjEffects(mark._user, obj, targets, anim, 0);
         this._marksManager.onMarkTriggered(mark);
         this._activeAction = oldActiveAction;
+    } else if (data.action) {
+        var skill = $dataSkills[data.action.skill];
+        entity.getCell().select();
+        BattleManagerTBS.forceAction(skill, mark._user);
     }
     this.wait(wait);
     return stopMovement ? 1 : 0;
@@ -266,7 +282,7 @@ BattleManagerTBS.processAurasEffectsWhenRemoved = function () {
     BattleManagerTBS.processAurasEffectsWhenApplied();
 };
 
-BattleManagerTBS.processAurasEffectsWhenMovement = function () {
+BattleManagerTBS.processAurasEffectsWhenMovement = function (entity) {
     BattleManagerTBS.processAurasEffectsWhenApplied();
 };
 
@@ -303,7 +319,7 @@ BattleManagerTBS.processAurasEffects = function (entity) {
 };
 
 BattleManagerTBS.executeAurasEffects = function (aura, entity, occasion) {
-    if (entity.rpgObject().leTbs_aurasImmune.includes(aura._id)) return;
+    if (entity.isImmuneToAura(aura._id)) return;
     var states = aura._data.states;
     if (!aura._data.affect_caster && aura._caster === entity)
         return;
@@ -326,6 +342,13 @@ BattleManagerTBS.executeAurasEffects = function (aura, entity, occasion) {
             entity.battler().removeState(states[i]);
         }
     }
+    if (occasion === "entering") {
+        if (aura._data.action) {
+            var skill = $dataSkills[aura._data.action.skill];
+            entity.getCell().select();
+            BattleManagerTBS.forceAction(skill, aura._caster);
+        }
+    }
     entity.addPopup();
 };
 
@@ -339,7 +362,37 @@ TBSEntity.prototype.initialize = function () {
     this._lastMarks = [];
     this._lastAuras = [];
     this._castingAuras = [];
+    this._castedMarks = this._castedAuras = false;
     Lecode.S_TBS.TilesMarksAura.oldTBSEntity_initialize.apply(this, arguments);
+};
+
+Lecode.S_TBS.TilesMarksAura.oldTBSEntity_setCell = TBSEntity.prototype.setCell;
+TBSEntity.prototype.setCell = function (cell) {
+    Lecode.S_TBS.TilesMarksAura.oldTBSEntity_setCell.call(this, cell);
+    if (!this._castedAuras)
+        this.castAuras();
+    if (!this._castedMarks)
+        this.castMarks();
+};
+
+TBSEntity.prototype.castAuras = function () {
+    this._castedAuras = true;
+    var auras = this.battler().collectLeTBSTags("auras");
+    for (var i = 0; i < auras.length; i++) {
+        var auraId = auras[i];
+        BattleManagerTBS._aurasManager.newAura(auraId, this);
+    }
+    if (auras.length > 0)
+        BattleManagerTBS.processAurasEffectsWhenApplied();
+};
+
+TBSEntity.prototype.castMarks = function () {
+    this._castedMarks = true;
+    var marks = this.battler().collectLeTBSTags("marks");
+    for (var i = 0; i < marks.length; i++) {
+        var id = marks[i];
+        BattleManagerTBS._marksManager.newMark(id, this, this.getCell());
+    }
 };
 
 Lecode.S_TBS.TilesMarksAura.oldTBSEntity_onTurnStart = TBSEntity.prototype.onTurnStart;
@@ -365,7 +418,7 @@ TBSEntity.prototype.teleport = function (cell) {
     Lecode.S_TBS.TilesMarksAura.oldTBSEntity_teleport.apply(this, arguments);
     BattleManagerTBS.processTileEffectsWhenMovement(this);
     BattleManagerTBS.processMarkEffectsWhenMovement(this);
-    BattleManagerTBS.processAurasEffectsWhenMovement();
+    BattleManagerTBS.processAurasEffectsWhenMovement(this);
 };
 
 Lecode.S_TBS.TilesMarksAura.oldTBSEntity_onSummoned = TBSEntity.prototype.onSummoned;
@@ -373,16 +426,16 @@ TBSEntity.prototype.onSummoned = function (caster, stats) {
     Lecode.S_TBS.TilesMarksAura.oldTBSEntity_onSummoned.call(this, caster, stats);
     BattleManagerTBS.processTileEffectsWhenMovement(this);
     BattleManagerTBS.processMarkEffectsWhenMovement(this);
-    BattleManagerTBS.processAurasEffectsWhenMovement();
+    BattleManagerTBS.processAurasEffectsWhenMovement(this);
 };
 
 Lecode.S_TBS.TilesMarksAura.oldTBSEntity_onCellCovered = TBSEntity.prototype.onCellCovered;
 TBSEntity.prototype.onCellCovered = function () {
-    var result = Lecode.S_TBS.TilesMarksAura.oldTBSEntity_onCellCovered.apply(this, arguments);
     var stop1 = BattleManagerTBS.processTileEffectsWhenMovement(this);
     var stop2 = BattleManagerTBS.processMarkEffectsWhenMovement(this);
-    BattleManagerTBS.processAurasEffectsWhenMovement();
-    return result || stop1 || stop2;
+    var stop3 = BattleManagerTBS.processAurasEffectsWhenMovement(this);
+    var result = Lecode.S_TBS.TilesMarksAura.oldTBSEntity_onCellCovered.apply(this, arguments);
+    return result || stop1 || stop2 || stop3;
 };
 
 Lecode.S_TBS.TilesMarksAura.oldTBSEntity_onDeath = TBSEntity.prototype.onDeath;
@@ -392,20 +445,18 @@ TBSEntity.prototype.onDeath = function () {
 };
 
 TBSEntity.prototype.isImmuneToMark = function (markId) {
-    var str = this.rpgObject().leTbs_marksImmune;
-    for (var i = 0; i < this._battler.states().length; i++) {
-        var state = this._battler.states()[i];
-        if (state)
-            str += state.leTbs_marksImmune;
-    }
-    if (this._battler.isActor()) {
-        for (var i = 0; i < this._battler.equips().length; i++) {
-            var equip = this._battler.equips()[i];
-            if (equip)
-                str += equip.leTbs_marksImmune;
-        }
-    }
+    var str = this.battler().getLeTBSTagStringValue("immuneToMarks");
     return str.includes(markId);
+};
+
+TBSEntity.prototype.isImmuneToAura = function (AuraId) {
+    var str = this.battler().getLeTBSTagStringValue("immuneToAuras");
+    return str.includes(AuraId);
+};
+
+TBSEntity.prototype.isImmuneToTileEffect = function (TileEffectId) {
+    var str = this.battler().getLeTBSTagStringValue("immuneToTileEffects");
+    return str.includes(TileEffectId);
 };
 
 
@@ -414,13 +465,14 @@ TBSEntity.prototype.isImmuneToMark = function (markId) {
 -------------------------------------------------------------------------*/
 TBSSequenceManager.prototype.commandMark = function (param) {
     var id = param[0];
-    var cellTargetData = param[1];
-    var cellTargets = this.readCellTargets(cellTargetData);
+    var cellTargets = this.readCellTargets(param[1]);
 
     for (var i = 0; i < cellTargets.length; i++) {
         var cell = cellTargets[i];
         BattleManagerTBS._marksManager.newMark(id, this.getUser(), cell);
     }
+
+    return {};
 };
 
 
@@ -640,11 +692,12 @@ Game_Battler.prototype.addNewState = function (stateId) {
     if (LeUtilities.isScene("Scene_Battle") && Lecode.S_TBS.commandOn) {
         var state = $dataStates[stateId];
         var entity = BattleManagerTBS.getEntityByBattler(this);
-        for (var i = 0; i < state.leTbs_auras.length; i++) {
-            var auraId = state.leTbs_auras[i];
+        var auras = LeUtilities.stringToArray(state.TagsLetbs.auras);
+        for (var i = 0; i < auras.length; i++) {
+            var auraId = auras[i];
             BattleManagerTBS._aurasManager.newAura(auraId, entity);
         }
-        if (state.leTbs_auras.length > 0)
+        if (auras.length > 0)
             BattleManagerTBS.processAurasEffectsWhenApplied();
     }
     Lecode.S_TBS.TilesMarksAura.oldGameBattler_addNewState.call(this, stateId);
@@ -654,92 +707,13 @@ Lecode.S_TBS.TilesMarksAura.oldGameBattler_removeState = Game_Battler.prototype.
 Game_Battler.prototype.removeState = function (stateId) {
     if (LeUtilities.isScene("Scene_Battle") && Lecode.S_TBS.commandOn) {
         var state = $dataStates[stateId];
-        for (var i = 0; i < state.leTbs_auras.length; i++) {
-            var auraId = state.leTbs_auras[i];
+        var auras = LeUtilities.stringToArray(state.TagsLetbs.auras);
+        for (var i = 0; i < auras.length; i++) {
+            var auraId = auras[i];
             BattleManagerTBS._aurasManager.removeAura(auraId);
         }
-        if (state.leTbs_auras.length > 0)
+        if (auras.length > 0)
             BattleManagerTBS.processAurasEffectsWhenRemoved();
     }
     Lecode.S_TBS.TilesMarksAura.oldGameBattler_removeState.call(this, stateId);
-};
-
-
-/*-------------------------------------------------------------------------
-* DataManager
--------------------------------------------------------------------------*/
-Lecode.S_TBS.TilesMarksAura.oldDataManager_processLeTBSTags = DataManager.processLeTBSTags;
-DataManager.processLeTBSTags = function () {
-    Lecode.S_TBS.TilesMarksAura.oldDataManager_processLeTBSTags.call(this);
-    this.processLeTBS_TilesMarksAuraTagsForBattlers();
-    this.processLeTBS_TilesMarksAuraTagsForEquipmentsAndStates();
-};
-
-DataManager.processLeTBS_TilesMarksAuraTagsForBattlers = function () {
-    var groups = [$dataActors, $dataEnemies, $dataClasses];
-    for (var i = 0; i < groups.length; i++) {
-        var group = groups[i];
-        for (var j = 1; j < group.length; j++) {
-            var obj = group[j];
-            var notedata = obj.note.split(/[\r\n]+/);
-            var letbs = false;
-
-            obj.leTbs_marksImmune = "";
-            obj.leTbs_aurasImmune = "";
-            obj.leTbs_tileEffectsImmune = "";
-
-            for (var k = 0; k < notedata.length; k++) {
-                var line = notedata[k];
-                if (line.match(/<letbs>/i))
-                    letbs = true;
-                else if (line.match(/<\/letbs>/i))
-                    letbs = false;
-
-                if (letbs) {
-                    if (line.match(/immune_to_marks\s?:\s?(.+)/i))
-                        obj.leTbs_marksImmune = String(RegExp.$1);
-                    else if (line.match(/immune_to_auras\s?:\s?(.+)/i))
-                        obj.leTbs_aurasImmune = String(RegExp.$1);
-                    else if (line.match(/immune_to_tile_effects\s?:\s?(.+)/i))
-                        obj.leTbs_tileEffectsImmune = String(RegExp.$1);
-                }
-            }
-        }
-    }
-};
-
-DataManager.processLeTBS_TilesMarksAuraTagsForEquipmentsAndStates = function () {
-    var groups = [$dataWeapons, $dataArmors, $dataStates];
-    for (var i = 0; i < groups.length; i++) {
-        var group = groups[i];
-        for (var j = 1; j < group.length; j++) {
-            var obj = group[j];
-            var notedata = obj.note.split(/[\r\n]+/);
-            var letbs = false;
-
-            obj.leTbs_auras = [];
-            obj.leTbs_marksImmune = "";
-            obj.leTbs_aurasImmune = "";
-            obj.leTbs_tileEffectsImmune = "";
-
-            for (var k = 0; k < notedata.length; k++) {
-                var line = notedata[k];
-                if (line.match(/<letbs>/i))
-                    letbs = true;
-                else if (line.match(/<\/letbs>/i))
-                    letbs = false;
-
-                if (letbs) {
-                    if (line.match(/aura\s?:\s?(.+)/i))
-                        obj.leTbs_auras.push(String(RegExp.$1));
-                    else if (line.match(/immune_to_marks\s?:\s?(.+)/i))
-                        obj.leTbs_marksImmune = String(RegExp.$1);
-                    else if (line.match(/immune_to_auras\s?:\s?(.+)/i))
-                        obj.leTbs_aurasImmune = String(RegExp.$1);
-                    else if (line.match(/immune_to_tile_effects\s?:\s?(.+)/i))
-                        obj.leTbs_tileEffectsImmune = String(RegExp.$1);
-                }
-            }
-        }
-    }
 };

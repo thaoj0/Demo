@@ -24,18 +24,34 @@ Lecode.S_TBS.AutoMode = {};
  * @author Lecode
  * @version 1.0
  *
-*
-* @param Command Text
-* @desc ...
-* @default Auto Battle
-*
-* @param Input
-* @desc Touch to activate/deactivate auto mode
-* @default tab
-*
+ * @param Command Text
+ * @desc The text drawn on the command window
+ * @default Auto Battle
+ *
+ * @param Input
+ * @desc Key to activate/deactivate auto mode
+ * @default tab
+ *
  *
  * @help
- * See the documentation
+ * ============================================================================
+ * Introduction
+ * ============================================================================
+ *
+ * This plugin adds the Auto Battle feature to LeTBS.
+ * A command is added to the "End Commands" window, which is accessible
+ * by pressing esc during a idle turn.
+ * 
+ * You can set up a keyboard as a shortcut to activate or deactive the auto
+ * battle mode, instead of using the commands window.
+ * 
+ * ============================================================================
+ * WARNING: Work In Progress
+ * ============================================================================
+ *
+ * The plugin is in WIP state currently. Activating the auto battle won't work
+ * right away. It'll only be in pending mode. Only the next turns after the
+ * current one will be automated.
  */
 //#=============================================================================
 
@@ -44,9 +60,8 @@ Lecode.S_TBS.AutoMode = {};
 * Get Parameters
 -------------------------------------------------------------------------*/
 var parameters = PluginManager.parameters('LeTBS_AutoBattle');
-
-Lecode.S_TBS.AutoMode.commandText = String(parameters["Command Text"] || "Auto Battle");
-Lecode.S_TBS.AutoMode.input = String(parameters["Input"] || "tab");	//	(): Touch to activate/deactivate auto mode
+Lecode.S_TBS.AutoMode.commandText = String(parameters["Command Text"] || "Auto Battle"); // (): The text drawn on the command window
+Lecode.S_TBS.AutoMode.input = String(parameters["Input"] || "tab");	// (): Key to activate/deactivate auto mode
 
 
 /*-------------------------------------------------------------------------
@@ -153,6 +168,13 @@ Window_TBSAutoMode.prototype.refresh = function () {
 /*-------------------------------------------------------------------------
 * BattleManagerTBS
 -------------------------------------------------------------------------*/
+BattleManagerTBS.processAutoBattle = function () {
+    var entity = this.activeEntity();
+    var battler = entity.battler();
+    this.newAction(battler, true);
+    this.startAiTurn(entity);
+};
+
 Lecode.S_TBS.AutoMode.oldBattleManagerTBS_turnEnd = BattleManagerTBS.turnEnd;
 BattleManagerTBS.turnEnd = function() {
     Lecode.S_TBS.AutoMode.oldBattleManagerTBS_turnEnd.call(this);

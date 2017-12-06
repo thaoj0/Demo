@@ -17,12 +17,20 @@
 var Lecode = Lecode || {};
 Lecode.S_TBS.AutoSelection = {};
 /*:
- * @plugindesc Speed up skills and items selection
+ * @plugindesc Automatically selects a target when an action is being used
  * @author Lecode
  * @version 1.0
  *
  * @help
- * ...
+ * ============================================================================
+ * Introduction
+ * ============================================================================
+ *
+ * This plugin automatically selects a target when a skill or an item is
+ * prepared to be used. This occurs when the action's scope is drawn.
+ * 
+ * The plugin selects the enemy in range with the lowest HP.
+ * In case of a friendly skill, an ally is targeted. Here again, with the lowest HP.
  */
 //#=============================================================================
 

@@ -23,105 +23,116 @@ Lecode.S_TBS.TimelineControl = {};
  * @plugindesc Add features related to the timeline
  * @author Lecode
  * @version 1.0
- **
-* @param Interrupt Chance
-* @desc Default % to interrupt a target who's charging
-* @default 15
-*
-* @param -- Extra Turn --
-* @desc ...
-* @default 
-*
-* @param Extra Turn Text
-* @desc ...
-* @default Extra Turn
-*
-* @param Extra Turn Font Size
-* @desc ...
-* @default 32
-*
-* @param Extra Turn Color
-* @desc ...
-* @default #CC2EFA
-*
-* @param -- Instant Turn --
-* @desc ...
-* @default 
-*
-* @param Instant Turn Text
-* @desc ...
-* @default Instant Turn
-*
-* @param Instant Turn Font Size
-* @desc ...
-* @default 32
-*
-* @param Instant Turn Color
-* @desc ...
-* @default #CC2EFA
-*
-* @param -- Interrupt --
-* @desc ...
-* @default 
-*
-* @param Interrupt Text
-* @desc ...
-* @default Interrupted
-*
-* @param Interrupt Font Size
-* @desc ...
-* @default 32
-*
-* @param Interrupt Color
-* @desc ...
-* @default #CC2EFA
-*
-* @param -- Acceleration --
-* @desc ...
-* @default 
-*
-* @param Acceleration Text
-* @desc ...
-* @default Acceleration
-*
-* @param Acceleration Font Size
-* @desc ...
-* @default 32
-*
-* @param Acceleration Color
-* @desc ...
-* @default #CC2EFA
-*
-* @param -- Deceleration --
-* @desc ...
-* @default 
-*
-* @param Deceleration Text
-* @desc ...
-* @default Acceleration
-*
-* @param Deceleration Font Size
-* @desc ...
-* @default 32
-*
-* @param Deceleration Color
-* @desc ...
-* @default #CC2EFA
-*
-* @param -- Turn Number --
-* @desc ...
-* @default 
-*
-* @param Accelerated Turn Font Size
-* @desc ...
-* @default 18
-*
-* @param Accelerated Turn Color
-* @desc ...
-* @default #FF4000
-*
+ *
+ * @param Interrupt Chance
+ * @desc Default % to interrupt a target who's charging
+ * @default 15
+ *
+ * @param -- Extra Turn --
+ * @desc [No description]
+ * @default 
+ *
+ * @param Extra Turn Text
+ * @desc [No description]
+ * @default Extra Turn
+ *
+ * @param Extra Turn Font Size
+ * @desc [No description]
+ * @default 32
+ *
+ * @param Extra Turn Color
+ * @desc [No description]
+ * @default #CC2EFA
+ *
+ * @param -- Instant Turn --
+ * @desc [No description]
+ * @default 
+ *
+ * @param Instant Turn Text
+ * @desc [No description]
+ * @default Instant Turn
+ *
+ * @param Instant Turn Font Size
+ * @desc [No description]
+ * @default 32
+ *
+ * @param Instant Turn Color
+ * @desc [No description]
+ * @default #CC2EFA
+ *
+ * @param -- Interrupt --
+ * @desc [No description]
+ * @default 
+ *
+ * @param Interrupt Text
+ * @desc [No description]
+ * @default Interrupted
+ *
+ * @param Interrupt Font Size
+ * @desc [No description]
+ * @default 32
+ *
+ * @param Interrupt Color
+ * @desc [No description]
+ * @default #CC2EFA
+ *
+ * @param -- Acceleration --
+ * @desc [No description]
+ * @default 
+ *
+ * @param Acceleration Text
+ * @desc [No description]
+ * @default Acceleration
+ *
+ * @param Acceleration Font Size
+ * @desc [No description]
+ * @default 32
+ *
+ * @param Acceleration Color
+ * @desc [No description]
+ * @default #CC2EFA
+ *
+ * @param -- Deceleration --
+ * @desc [No description]
+ * @default 
+ *
+ * @param Deceleration Text
+ * @desc [No description]
+ * @default Acceleration
+ *
+ * @param Deceleration Font Size
+ * @desc [No description]
+ * @default 32
+ *
+ * @param Deceleration Color
+ * @desc [No description]
+ * @default #CC2EFA
+ *
+ * @param -- Turn Number --
+ * @desc [No description]
+ * @default 
+ *
+ * @param Accelerated Turn Font Size
+ * @desc [No description]
+ * @default 18
+ *
+ * @param Accelerated Turn Color
+ * @desc [No description]
+ * @default #FF4000
+ *
  * @help
- * See the documentation
+ * ============================================================================
+ * Introduction
+ * ============================================================================
+ *
+ * This add-on is too intricate to be described here. Please refer to the online
+ * documentation.
+ * 
+ * ============================================================================
+ * WARNING: Work In Progress
+ * ============================================================================
+ *
+ * The plugin is in WIP state currently.
  */
 //#=============================================================================
 
@@ -171,57 +182,15 @@ TBSEntity.prototype.initialize = function (battler, layer) {
 };
 
 TBSEntity.prototype.getExtraTurnRate = function () {
-    var value = 0;
-    value += this.rpgObject().leTbs_extraTurn;
-    this.battler().states().forEach(function (state) {
-        if (state) {
-            value += state.leTbs_extraTurn;
-        }
-    });
-    if (this.battler().isActor()) {
-        this.battler().equips().forEach(function (equip) {
-            if (equip) {
-                value += equip.leTbs_extraTurn;
-            }
-        });
-    }
-    return value * 0.01;
+    return this.battler().getLeTBSTagNumberValue("extraTurn") * 0.01;
 };
 
 TBSEntity.prototype.getInterruptChargeRate = function () {
-    var value = Lecode.S_TBS.TimelineControl.interruptChance;
-    value += this.rpgObject().leTbs_interruptCharge;
-    this.battler().states().forEach(function (state) {
-        if (state) {
-            value += state.leTbs_interruptCharge;
-        }
-    });
-    if (this.battler().isActor()) {
-        this.battler().equips().forEach(function (equip) {
-            if (equip) {
-                value += equip.leTbs_interruptCharge;
-            }
-        });
-    }
-    return value * 0.01;
+    return this.battler().getLeTBSTagNumberValue("interruptChance", Lecode.S_TBS.TimelineControl.interruptChance) * 0.01;
 };
 
 TBSEntity.prototype.getInterruptChargeDefenseRate = function () {
-    var value = 0;
-    value += this.rpgObject().leTbs_interruptChargeDefense;
-    this.battler().states().forEach(function (state) {
-        if (state) {
-            value += state.leTbs_interruptChargeDefense;
-        }
-    });
-    if (this.battler().isActor()) {
-        this.battler().equips().forEach(function (equip) {
-            if (equip) {
-                value += equip.leTbs_interruptChargeDefense;
-            }
-        });
-    }
-    return value * 0.01;
+    return this.battler().getLeTBSTagNumberValue("interruptChargeDefense") * 0.01;
 };
 
 Lecode.S_TBS.TimelineControl.oldTBSEntity_onTurnEnd = TBSEntity.prototype.onTurnEnd;
@@ -309,29 +278,31 @@ BattleManagerTBS.processAction = function () {
     var action = this.activeAction();
     var item = action.item();
     var entity = this.activeEntity();
-    var chargeTurns = item.leTbs_charge.turns;
-    if (!entity.isCharging() && chargeTurns) {
-        var x = this.cursor().cellX;
-        var y = this.cursor().cellY;
-        var cursorCell = this.getCellAt(x, y);
-        entity.setPose("charge", "charge");
-        entity._chargingData = {
-            turns: chargeTurns,
-            anim: item.leTbs_charge.anim,
-            cell: cursorCell,
-            actionScope: this._actionScope,
-            actionAoE: this._actionAoE,
-            item: item
-        };
-        entity.lookAt(this._activeCell);
-        this.processCommandPass();
-        return;
+    if (item.TagsLetbs.charge) {
+        var chargeTurns = item.TagsLetbs.charge.turns;
+        if (!entity.isCharging() && chargeTurns) {
+            var x = this.cursor().cellX;
+            var y = this.cursor().cellY;
+            var cursorCell = this.getCellAt(x, y);
+            entity.setPose("charge", "charge");
+            entity._chargingData = {
+                turns: chargeTurns,
+                anim: item.TagsLetbs.charge.anim,
+                cell: cursorCell,
+                actionScope: this._actionScope,
+                actionAoE: this._actionAoE,
+                item: item
+            };
+            entity.lookAt(this._activeCell);
+            this.processCommandPass();
+            return;
+        }
     }
     Lecode.S_TBS.TimelineControl.oldBattleManagerTBS_processAction.call(this);
 };
 
 Lecode.S_TBS.TimelineControl.oldBattleManagerTBS_startAiTurn = BattleManagerTBS.startAiTurn;
-BattleManagerTBS.startAiTurn = function (entity, battler) {
+BattleManagerTBS.startAiTurn = function (entity, options) {
     if (entity.isCharging()) {
         entity._chargingData.turns--;
         if (entity._chargingData.turns === 0) {
@@ -342,13 +313,12 @@ BattleManagerTBS.startAiTurn = function (entity, battler) {
             this._actionScope = entity._chargingData.actionScope;
             this.processAction();
             this.checkScopeVisibility([cell], entity.getCell());
-            console.log("cell._scopeVisible:", cell._scopeVisible);
         } else {
             this.processCommandPass();
         }
         return;
     }
-    Lecode.S_TBS.TimelineControl.oldBattleManagerTBS_startAiTurn.call(this, entity, battler);
+    Lecode.S_TBS.TimelineControl.oldBattleManagerTBS_startAiTurn.call(this, entity, options);
 };
 
 BattleManagerTBS.addExtraTurn = function (entity) {
@@ -418,15 +388,15 @@ BattleManagerTBS.onPrimarySequenceEnd = function (seqMng) {
 };
 
 BattleManagerTBS.applyTimelineControlEffects = function (user, item, target) {
-    if (Math.random() < item.leTbs_extraTurn) {
+    if (Math.random() < item.TagsLetbs.extraTurn) {
         this.addExtraTurn(target);
-    } else if (Math.random() < item.leTbs_accelerateTurn) {
+    } else if (Math.random() < item.TagsLetbs.accelerateTurn) {
         this.accelerateTurn(user, target, 1);
-    } else if (Math.random() < item.leTbs_deccelerateTurn) {
+    } else if (Math.random() < item.TagsLetbs.deccelerateTurn) {
         this.accelerateTurn(user, target, -1);
-    } else if (Math.random() < item.leTbs_instantTurn) {
+    } else if (Math.random() < item.TagsLetbs.instantTurn) {
         this.setInstantTurn(user, target);
-    } else if (Math.random() < item.leTbs_extraInstantTurn) {
+    } else if (Math.random() < item.TagsLetbs.extraInstantTurn) {
         this.setInstantTurn(user, target, true);
     }
 };
@@ -439,7 +409,6 @@ BattleManagerTBS.accelerateTurn = function (user, target, value) {
 
     this.allEntities().forEach(function (entity) {
         entity._oldTurnOrderIndex = this._turnOrderVisual.getEntityIndex(entity);
-        console.log(entity.battler().name(), " ", entity._oldTurnOrderIndex);
     }.bind(this));
 
     var e = this._turnOrder[newIndex];
@@ -461,7 +430,6 @@ BattleManagerTBS.setInstantTurn = function (user, target, extra) {
 
     this.allEntities().forEach(function (entity) {
         entity._oldTurnOrderIndex = this._turnOrderVisual.getEntityIndex(entity);
-        console.log(entity.battler().name(), " ", entity._oldTurnOrderIndex);
     }.bind(this));
 
     var text = Lecode.S_TBS.TimelineControl.instantTurnText;
@@ -506,129 +474,17 @@ Window_TBSEntityTurn.prototype.refreshText = function (index) {
 
 
 /*-------------------------------------------------------------------------
-* DataManager
+* Scene_Boot
 -------------------------------------------------------------------------*/
-Lecode.S_TBS.TimelineControl.oldDataManager_processLeTBSTags = DataManager.processLeTBSTags;
-DataManager.processLeTBSTags = function () {
-    Lecode.S_TBS.TimelineControl.oldDataManager_processLeTBSTags.call(this);
-    this.processLeTBS_TimelineControlTagsForBattlers();
-    this.processLeTBS_TimelineControlTagsForEquipmentsAndStates();
-    this.processLeTBS_TimelineControlTagsForObjects();
-};
-
-
-DataManager.processLeTBS_TimelineControlTagsForBattlers = function () {
-    var groups = [$dataActors, $dataEnemies, $dataClasses];
-    for (var i = 0; i < groups.length; i++) {
-        var group = groups[i];
-        for (var j = 1; j < group.length; j++) {
-            var obj = group[j];
-            var notedata = obj.note.split(/[\r\n]+/);
-            var letbs = false;
-
-            obj.leTbs_extraTurn = 0;
-            obj.leTbs_interruptCharge = 0;
-            obj.leTbs_interruptChargeDefense = 0;
-
-            for (var k = 0; k < notedata.length; k++) {
-                var line = notedata[k];
-                if (line.match(/<letbs>/i))
-                    letbs = true;
-                else if (line.match(/<\/letbs>/i))
-                    letbs = false;
-
-                if (letbs) {
-                    if (line.match(/extra_turn\s?:\s?(.+)\%/i)) {
-                        obj.leTbs_extraTurn = Number(RegExp.$1);
-                    } else if (line.match(/interrupt_charge\s?:\s?(.+)\%/i)) {
-                        obj.leTbs_interruptCharge = Number(RegExp.$1);
-                    } else if (line.match(/interrupt_charge_defense\s?:\s?(.+)\%/i)) {
-                        obj.leTbs_interruptChargeDefense = Number(RegExp.$1);
-                    }
-                }
-            }
-        }
-    }
-};
-
-DataManager.processLeTBS_TimelineControlTagsForEquipmentsAndStates = function () {
-    var groups = [$dataWeapons, $dataArmors, $dataStates];
-    for (var i = 0; i < groups.length; i++) {
-        var group = groups[i];
-        for (var j = 1; j < group.length; j++) {
-            var obj = group[j];
-            var notedata = obj.note.split(/[\r\n]+/);
-            var letbs = false;
-
-            obj.leTbs_extraTurn = 0;
-            obj.leTbs_interruptCharge = 0;
-            obj.leTbs_interruptChargeDefense = 0;
-
-            for (var k = 0; k < notedata.length; k++) {
-                var line = notedata[k];
-                if (line.match(/<letbs>/i))
-                    letbs = true;
-                else if (line.match(/<\/letbs>/i))
-                    letbs = false;
-
-                if (letbs) {
-                    if (line.match(/extra_turn\s?:\s?(.+)\%/i)) {
-                        obj.leTbs_extraTurn = Number(RegExp.$1);
-                    } else if (line.match(/interrupt_charge\s?:\s?(.+)\%/i)) {
-                        obj.leTbs_interruptCharge = Number(RegExp.$1);
-                    } else if (line.match(/interrupt_charge_defense\s?:\s?(.+)\%/i)) {
-                        obj.leTbs_interruptChargeDefense = Number(RegExp.$1);
-                    }
-                }
-            }
-        }
-    }
-};
-
-DataManager.processLeTBS_TimelineControlTagsForObjects = function () {
-    var groups = [$dataSkills, $dataItems, $dataWeapons];
-    for (var i = 0; i < groups.length; i++) {
-        var group = groups[i];
-        for (var j = 1; j < group.length; j++) {
-            var obj = group[j];
-            var notedata = obj.note.split(/[\r\n]+/);
-            var letbs = false;
-
-            obj.leTbs_charge = {
-                turns: null,
-                anim: 0
-            };
-            obj.leTbs_extraTurn = 0;
-            obj.leTbs_accelerateTurn = 0;
-            obj.leTbs_deccelerateTurn = 0;
-            obj.leTbs_instantTurn = 0;
-            obj.leTbs_extraInstantTurn = 0;
-
-            for (var k = 0; k < notedata.length; k++) {
-                var line = notedata[k];
-                if (line.match(/<letbs>/i))
-                    letbs = true;
-                else if (line.match(/<\/letbs>/i))
-                    letbs = false;
-
-                if (letbs) {
-                    if (line.match(/charge\s?:\s?(.+)/i)) {
-                        var strs = RegExp.$1.split(",");
-                        obj.leTbs_charge.turns = Number(strs[0].trim());
-                        obj.leTbs_charge.anim = Number(strs[1].trim());
-                    } else if (line.match(/extra_turn\s?:\s?(.+)\%/i)) {
-                        obj.leTbs_extraTurn = Number(RegExp.$1);
-                    } else if (line.match(/accelerate_turn\s?:\s?(.+)\%/i)) {
-                        obj.leTbs_accelerateTurn = Number(RegExp.$1);
-                    } else if (line.match(/deccelerate_turn\s?:\s?(.+)\%/i)) {
-                        obj.leTbs_deccelerateTurn = Number(RegExp.$1);
-                    } else if (line.match(/extra_instant_turn\s?:\s?(.+)\%/i)) {
-                        obj.leTbs_extraInstantTurn = Number(RegExp.$1);
-                    } else if (line.match(/instant_turn\s?:\s?(.+)\%/i)) {
-                        obj.leTbs_instantTurn = Number(RegExp.$1);
-                    }
-                }
-            }
-        }
+Lecode.S_TBS.TimelineControl.oldSceneBoot_parseLeTBSTag = Scene_Boot.prototype.parseLeTBSTag;
+Scene_Boot.prototype.parseLeTBSTag = function (prop, obj, tags) {
+    Lecode.S_TBS.TimelineControl.oldSceneBoot_parseLeTBSTag.call(this, prop, obj, tags);
+    var element = tags[prop];
+    if (prop.match(/charge/i)) {
+        var strs = element.split(",");
+        tags.charge = {
+            turns: Number(strs[0].trim()),
+            anim: Number(strs[1].trim())
+        };
     }
 };

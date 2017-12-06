@@ -17,12 +17,18 @@
 var Lecode = Lecode || {};
 Lecode.S_TBS.EntityHud = {};
 /*:
- * @plugindesc Draw a mini hud for each entity
+ * @plugindesc Displays a mini hud for your entities
  * @author Lecode
  * @version 1.0
  *
  * @help
- * ...
+ * ============================================================================
+ * Introduction
+ * ============================================================================
+ *
+ * This plugin displays a tiny hud over the entities. The hud is only shown
+ * when the cursor is on an entity.
+ * The hud display the entity's name as well as an HP bar.
  */
 //#=============================================================================
 

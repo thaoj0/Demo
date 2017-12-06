@@ -21,12 +21,17 @@ Imported["LeTBS_YanflyPatch"] = true;
 var Lecode = Lecode || {};
 Lecode.S_TBS.YanflyPatch = {};
 /*:
- * @plugindesc Fix compatibility issues with Yanfly's plugins
+ * @plugindesc Fixes compatibility issues with Yanfly's plugins
  * @author Lecode
  * @version 1.1
  *
+
  * @help
- * Nothing here
+ * ============================================================================
+ * Introduction
+ * ============================================================================
+ *
+ * This plugin fixes some compatibility issues with Yanfly's plugins.
  */
 //#=============================================================================
 
@@ -78,7 +83,7 @@ if (Imported.YEP_X_SkillCooldowns) {
         Lecode.S_TBS.YanflyPatch.oldGameTroop_increaseTurn = Game_Troop.prototype.increaseTurn;
         Game_Troop.prototype.increaseTurn = function () {
             Lecode.S_TBS.YanflyPatch.oldGameTroop_increaseTurn.call(this);
-            BattleManagerTBS._activeSummons.forEach(function (entity) {
+            BattleManagerTBS._summons.forEach(function (entity) {
                 entity.battler().updateCooldowns();
                 entity.battler().updateWarmups();
             });

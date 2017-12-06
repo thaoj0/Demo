@@ -23,7 +23,7 @@ if (!Lecode.S_TBS)
     throw new Error("LeTBSWindows must be below LeTBS");
 Lecode.S_TBS.Windows = {};
 /*:
- * @plugindesc (WIP)Version A Windows for LeTBS
+ * @plugindesc Version A Windows for LeTBS
  * @author Lecode
  * @version 1.4
  *
@@ -136,7 +136,21 @@ Lecode.S_TBS.Windows = {};
  * @default 3
  *
  * @help
- * ...
+ * ============================================================================
+ * Introduction
+ * ============================================================================
+ *
+ * This plugin is a part of LeTBS Core centered around windows.
+ * The windows definition are made in the core plugin but the content are
+ * defined here.
+ * The windows are very basic. It's up to your team to design them following
+ * your needs.
+ * 
+ * ============================================================================
+ * WARNING: Work In Progress
+ * ============================================================================
+ *
+ * The plugin is in WIP state currently.
  */
 //#=============================================================================
 
@@ -583,6 +597,8 @@ Window_Base.prototype.drawBasicInfo = function(actor, x, y) {
     this.drawActorIcons(actor, x, y + lineHeight * 1);
     this.drawActorHp(actor, x, y + lineHeight * 2);
     this.drawActorMp(actor, x, y + lineHeight * 3);
+    var max = Lecode.S_TBS.Windows.statusWindowMaxStates;
+    this.drawActorIcons(this._entity.battler(), x, y, Window_Base._iconWidth * max);
 };
 
 Window_TBSStatus.prototype.drawSprite = function () {
@@ -596,10 +612,6 @@ Window_TBSStatus.prototype.drawSprite = function () {
 };
 
 Window_TBSStatus.prototype.drawActorTp = function (actor, x, y, width) {
-//    width = width || 96;
-//    var color1 = this.tpGaugeColor1();
-//    var color2 = this.tpGaugeColor2();
-//    this.drawGauge(x, y, width, actor.tpRate(), color1, color2);
     width = width || 96;
     var color1 = this.tpGaugeColor1();
     var color2 = this.tpGaugeColor2();

@@ -26,6 +26,12 @@ Lecode.S_DamageFormula = {};
  *
  * @help
  * See the documentation
+ * ============================================================================
+ * What is this ?
+ * ============================================================================
+ *
+ * This plugin is just a tool to setup damage formula more easily.
+ * If your formula is too long or too elaborated you can simply put it bellow.
  */
 //#=============================================================================
 
@@ -45,14 +51,10 @@ Game_Action.prototype.evalDamageFormula = function (target) {
     var b = target;
     this.phyDmg = function (rate) {
         //var rawDmg = (a.atk * 4 - b.def * 2) * rate * 0.01;
-        var rawDmg = a.atk;// * 2 * rate * 0.01;
-        var reduction = 0;//b.def / (b.def + 2 * rawDmg);
         return Math.floor(rawDmg - reduction * rawDmg);
     };
     this.magDmg = function (rate) {
         //var rawDmg = (a.mat * 4 - b.mdf * 2) * rate * 0.01;
-        var rawDmg = a.mat;// * 2 * rate * 0.01;
-        var reduction = 0;//b.mdf / (b.mdf + 2 * rawDmg);
         return Math.floor(rawDmg - reduction * rawDmg);
     };
     return Lecode.S_DamageFormula.oldGameAction_evalDamageFormula.call(this, target);

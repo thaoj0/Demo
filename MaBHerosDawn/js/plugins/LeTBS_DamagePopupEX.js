@@ -3,7 +3,7 @@
 # LeTBS: Damage Popup EX
 # LeTBS_DamagePopupEX.js
 # By Lecode
-# Version 1.2
+# Version 1.3
 #-----------------------------------------------------------------------------
 # TERMS OF USE
 #-----------------------------------------------------------------------------
@@ -14,6 +14,7 @@
 # - 1.0 : Initial release
 # - 1.1 : Support move points popup
 # - 1.2 : Added text popup
+# - 1.3 : Move points popup are correctly supported
 #=============================================================================
 */
 var Imported = Imported || {};
@@ -24,10 +25,31 @@ Lecode.S_TBS.DamagePopupEX = {};
 /*:
  * @plugindesc Improve popups and show states alterations
  * @author Lecode
- * @version 1.2
+ * @version 1.3
  *
  * @help
- * ...
+ * ============================================================================
+ * Introduction
+ * ============================================================================
+ *
+ * This plugin add some extra features to the popup display for LeTBS.
+ * The popup system is also modified to display the damage in chain.
+ * 
+ * ============================================================================
+ * Force Popup
+ * ============================================================================
+ *
+ * You can force a popup on an entity using a plugin command
+ * LeTBS ShowPopup [Entity] Text(...) FontSize(...) Color(...) IconL(...) IconR(...)
+ * 
+ * The parameters after Text are optional. Replace the dots with wanted values.
+ * For more details, see the documentation page about plugin commands.
+ * 
+ * ============================================================================
+ * WARNING: Work In Progress
+ * ============================================================================
+ *
+ * The plugin is in WIP state currently. Most of the features are unexploited.
  */
 //#=============================================================================
 
@@ -61,6 +83,13 @@ TBSEntity.prototype.addTextIconPopup = function (text, icL, icR, fontSize) {
     this._sprite.addTextIconPopup(arguments);
 };
 
+Lecode.S_TBS.DamagePopupEX.oldTBSEntity_changeMovePoints = TBSEntity.prototype.changeMovePoints;
+TBSEntity.prototype.changeMovePoints = function (nbr) {
+    Lecode.S_TBS.DamagePopupEX.oldTBSEntity_changeMovePoints.call(this, nbr);
+    if (nbr !== 0)
+        this._sprite.addExtraPopup("movePoints", [nbr]);
+};
+
 /*-------------------------------------------------------------------------
 * TBSEntity_Sprite
 -------------------------------------------------------------------------*/
@@ -77,9 +106,6 @@ TBSEntity_Sprite.prototype.addPopup = function () {
     Lecode.S_TBS.DamagePopupEX.oldTBSEntitySprite_addPopup.call(this);
     var addedStates = result.addedStateObjects();
     var removedStates = result.removedStateObjects();
-    var diffMovePts = this._popupsInfo.movePoints ? this._entity.getMovePoints() - this._popupsInfo.movePoints : 0;
-    if (diffMovePts !== 0)
-        this.addExtraPopup("movePoints", [diffMovePts]);
     while (addedStates.length > 0) {
         this.addExtraPopup("addedState", [addedStates.shift()]);
     }
@@ -137,9 +163,9 @@ Sprite_Damage.prototype.extraSetup = function (type, args) {
     else if (type === "movePoints")
         this.createMovePoints(args[0]);
     else if (type === "text")
-        this.createText(args[0],args[1],args[2]);
+        this.createText(args[0], args[1], args[2]);
     else if (type === "textIcon")
-        this.createTextIcon(args[0],args[1],args[2],args[3],args[4]);
+        this.createTextIcon(args[0], args[1], args[2], args[3], args[4]);
 };
 
 Sprite_Damage.prototype.createAddedStates = function (state) {
@@ -196,11 +222,11 @@ Sprite_Damage.prototype.createTextIcon = function (text, icL, icR, fontSize, col
     var w = 2 + textW + Window_Base._iconWidth +
         (icL ? Window_Base._iconWidth : 0) +
         (icR ? Window_Base._iconWidth : 0);
-    var h = Math.max(Window_Base._iconHeight,fontSize) + 2;
+    var h = Math.max(Window_Base._iconHeight, fontSize) + 2;
     var sprite = this.createExtraChildSprite(w, h);
     if (icL)
         this.drawIcon(sprite, icL, 0, 0);
-    this.drawText(sprite, text, Window_Base._iconWidth, 0, w, null, color);
+    this.drawText(sprite, text, Window_Base._iconWidth + 2, 0, w, null, color);
     if (icR)
         this.drawIcon(sprite, icR, textW + Window_Base._iconWidth, 0);
 };

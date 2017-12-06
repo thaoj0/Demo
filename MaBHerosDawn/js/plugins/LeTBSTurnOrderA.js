@@ -3,7 +3,7 @@
 # Turn Order Visual for Lecode's TBS
 # LeTBSTurnOrderA.js
 # By Lecode
-# Version A - 1.4
+# Version A - 1.5
 #-----------------------------------------------------------------------------
 # TERMS OF USE
 #-----------------------------------------------------------------------------
@@ -17,6 +17,7 @@
 # - 1.4 : Added turn numbers
 #		  Improved the hud
 #		  Added parameters
+# - 1.5 : Support entities filename change
 #=============================================================================
 */
 var Lecode = Lecode || {};
@@ -26,70 +27,80 @@ Lecode.S_TBS.TurnOrderVisual = {};
 /*:
  * @plugindesc Version A Turn Order for LeTBS
  * @author Lecode
- * @version 1.4
- **
-* @param Visible
-* @desc ...
-* @default true
-*
-* @param -- HUD --
-* @desc ...
-* @default 
-*
-* @param Pos
-* @desc ...
-* @default top
-*
-* @param Right Margin
-* @desc ...
-* @default 20
-*
-* @param Left Margin
-* @desc ...
-* @default 20
-*
-* @param Top Margin
-* @desc ...
-* @default 10
-*
-* @param Bottom Margin
-* @desc ...
-* @default 20
-*
-* @param Size
-* @desc ...
-* @default 40
-*
-* @param Space
-* @desc ...
-* @default 6
-*
-* @param -- Numbers --
-* @desc ...
-* @default 
-*
-* @param Show Numbers ?
-* @desc ...
-* @default true
-*
-* @param Numbers Font Size
-* @desc ...
-* @default 18
-*
-* @param Numbers Color
-* @desc ...
-* @default #FFFFFF
-*
-* @param Next Turn Color
-* @desc ...
-* @default #31B404
-*
-* @param Numbers Flash
-* @desc [red, green, blue, grey]
-* @default [255, 0, 0, 255]
-*
+ * @version 1.5
+ *
+ * @param Visible
+ * @desc [No description]
+ * @default true
+ *
+ * @param -- HUD --
+ * @desc [No description]
+ * @default 
+ *
+ * @param Pos
+ * @desc [No description]
+ * @default top
+ *
+ * @param Right Margin
+ * @desc [No description]
+ * @default 20
+ *
+ * @param Left Margin
+ * @desc [No description]
+ * @default 20
+ *
+ * @param Top Margin
+ * @desc [No description]
+ * @default 10
+ *
+ * @param Bottom Margin
+ * @desc [No description]
+ * @default 20
+ *
+ * @param Size
+ * @desc [No description]
+ * @default 40
+ *
+ * @param Space
+ * @desc [No description]
+ * @default 6
+ *
+ * @param -- Numbers --
+ * @desc [No description]
+ * @default 
+ *
+ * @param Show Numbers ?
+ * @desc [No description]
+ * @default true
+ *
+ * @param Numbers Font Size
+ * @desc [No description]
+ * @default 18
+ *
+ * @param Numbers Color
+ * @desc [No description]
+ * @default #FFFFFF
+ *
+ * @param Next Turn Color
+ * @desc [No description]
+ * @default #31B404
+ *
+ * @param Numbers Flash
+ * @desc [red, green, blue, grey]
+ * @default [255, 0, 0, 255]
+ *
  * @help
- * ...
+ * ============================================================================
+ * Introduction
+ * ============================================================================
+ *
+ * This plugin displays the battle turn order on the screen.
+ * 
+ * ============================================================================
+ * WARNING: Work In Progress
+ * ============================================================================
+ *
+ * The plugin is in WIP state currently. A LOT of features are missing.
  */
 //#=============================================================================
 
@@ -147,18 +158,15 @@ TBSTurnOrderVisual.prototype.loadBorderBitmaps = function () {
 	this._borderEnemy = ImageManager.loadLeTBSTurnOrder("Turn_Enemy");
 };
 
-TBSTurnOrderVisual.prototype.set = function (order) {
+TBSTurnOrderVisual.prototype.set = function (order, index) {
 	this._turnOrder = [];
 	for (var i = 0; i < order.length; i++) {
 		var entity = order[i];
 		this._turnOrder.push(new this.Turn(entity));
 	}
 	this._order = order;
-	this._activeIndex = 0;
-	this.makeSprites();
-	this.setPositions();
-	this.updateOrderState();
-	this.updateTurnNumbers();
+	this._activeIndex = index || 0;
+	this.refresh();
 };
 
 TBSTurnOrderVisual.prototype.update = function () {
@@ -184,12 +192,26 @@ TBSTurnOrderVisual.prototype.updateOnEntityRevive = function (newOrder, index) {
 	this.updateTurnNumbers();
 };
 
+TBSTurnOrderVisual.prototype.updateOnEntityHide = function (newOrder, index) {
+    this.refresh();
+};
+
+TBSTurnOrderVisual.prototype.updateOnEntityShow = function (newOrder, index) {
+    this.refresh();
+};
+
+TBSTurnOrderVisual.prototype.refresh = function () {
+	this.makeSprites();
+	this.setPositions();
+	this.updateOrderState();
+	this.updateTurnNumbers();
+};
+
 TBSTurnOrderVisual.prototype.updateTurnNumbers = function () {
 	if(!Lecode.S_TBS.TurnOrderVisual.numbersVisible) return;
 	for (var i = 0; i < this._order.length; i++) {
 		var entity = this._order[i];
-		if (entity.battler().isDead()) {
-			entity._turnIndex.hide();
+		if (entity.battler().isDead() || entity.isTurnHidden()) {
 			continue;
 		}
 		var index = i - this._activeIndex;
@@ -207,12 +229,13 @@ TBSTurnOrderVisual.prototype.makeSprites = function () {
 
 	for (var i = 0; i < this._turnOrder.length; i++) {
 		var turn = this._turnOrder[i];
+		var entity = turn.entity;
+		if (entity.isTurnHidden()) continue;
 		if (turn.mainSprite) {
 			while (turn.mainSprite.children.length > 0)
 				turn.mainSprite.removeChildAt(0);
 			turn.mainSprite = null;
 		}
-		var entity = turn.entity;
 		var main = new Sprite(new Bitmap(size, size));
 		var border = new Sprite();
 		var bitmap = this.getSpriteBitmap(entity);
@@ -265,10 +288,17 @@ TBSTurnOrderVisual.prototype.setPositions = function () {
 			shiftY = 0;
 			break;
 	}
+	var counterI = 0;
 	for (var i = 0; i < this._turnOrder.length; i++) {
-		var sprite = this._turnOrder[i].mainSprite;
-		sprite.x = sx + shiftX * i;
-		sprite.y = sy + shiftY * i;
+		var turn = this._turnOrder[i];
+		var entity = turn.entity;
+		if (entity.isTurnHidden()) {
+			counterI++;
+			continue;
+		}
+		var sprite = turn.mainSprite;
+		sprite.x = sx + shiftX * (i - counterI);
+		sprite.y = sy + shiftY * (i - counterI);
 	}
 };
 
@@ -295,6 +325,8 @@ TBSTurnOrderVisual.prototype.updateOrderState = function () {
 	if (this._turnOrder.length === 0) return;
 	for (var i = 0; i < this._turnOrder.length; i++) {
 		var turn = this._turnOrder[i];
+		var entity = turn.entity;
+		if (entity.isTurnHidden()) continue;
 		turn.borderSprite._leU_loopFlash = false;
 		turn.borderSprite.leU_clearFlash();
 		if (turn.entity._battler.isActor())
@@ -339,6 +371,22 @@ TBSTurnOrderVisual.prototype.getEntityIndex = function (entity) {
 	return -1;
 };
 
+TBSTurnOrderVisual.prototype.hide = function () {
+	for (var i = 0; i < this._turnOrder.length; i++) {
+		this._turnOrder[i].mainSprite.visible = false;
+		this._turnOrder[i].borderSprite.visible = false;
+		this._turnOrder[i].miniatureSprite.visible = false;
+	}
+};
+
+TBSTurnOrderVisual.prototype.show = function () {
+	for (var i = 0; i < this._turnOrder.length; i++) {
+		this._turnOrder[i].mainSprite.visible = true;
+		this._turnOrder[i].borderSprite.visible = true;
+		this._turnOrder[i].miniatureSprite.visible = true;
+	}
+};
+
 
 /*-------------------------------------------------------------------------
 * TBSEntity
@@ -354,6 +402,30 @@ Lecode.S_TBS.TurnOrderVisual.oldTBSEntity_update = TBSEntity.prototype.update;
 TBSEntity.prototype.update = function () {
 	Lecode.S_TBS.TurnOrderVisual.oldTBSEntity_update.call(this);
 	this._turnIndex.updatePosition();
+};
+
+Lecode.S_TBS.TurnOrderVisual.oldTBSEntity_applyFilenameChange = TBSEntity.prototype.applyFilenameChange;
+TBSEntity.prototype.applyFilenameChange = function () {
+    Lecode.S_TBS.TurnOrderVisual.oldTBSEntity_applyFilenameChange.call(this);
+    BattleManagerTBS._turnOrderVisual.refresh();
+};
+
+Lecode.S_TBS.TurnOrderVisual.oldTBSEntity_destroy = TBSEntity.prototype.destroy;
+TBSEntity.prototype.destroy = function () {
+	Lecode.S_TBS.TurnOrderVisual.oldTBSEntity_destroy.call(this);
+	this._turnIndex.hide();
+};
+
+Lecode.S_TBS.TurnOrderVisual.oldTBSEntity_onDeath = TBSEntity.prototype.onDeath;
+TBSEntity.prototype.onDeath = function () {
+	Lecode.S_TBS.TurnOrderVisual.oldTBSEntity_onDeath.call(this);
+	this._turnIndex.hide();
+};
+
+Lecode.S_TBS.TurnOrderVisual.oldTBSEntity_onRevive = TBSEntity.prototype.onRevive;
+TBSEntity.prototype.onRevive = function () {
+	Lecode.S_TBS.TurnOrderVisual.oldTBSEntity_onRevive.call(this);
+	this._turnIndex.show();
 };
 
 

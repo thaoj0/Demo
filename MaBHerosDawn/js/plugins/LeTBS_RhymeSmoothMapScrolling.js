@@ -24,8 +24,13 @@ Lecode.S_TBS.RhymeSmoothMapScrolling = {};
  * @author Lecode
  * @version 1.0
  *
- * @help
- * ...
+* @help
+ * ============================================================================
+ * Introduction
+ * ============================================================================
+ *
+ * This plugin is just a compatibility patch for Rhyme's smooth map scrolling.
+ * This add-on should be above
  */
 //#=============================================================================
 

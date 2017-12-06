@@ -20,12 +20,36 @@ Imported.LeTBS_Encounters = true;
 var Lecode = Lecode || {};
 Lecode.S_TBS.Encounters = {};
 /*:
- * @plugindesc Add encounter settings for LeTBS
+ * @plugindesc Teleports the party to specified maps when an encounter occurs.
  * @author Lecode
  * @version 1.0
  * 
  * @help
- * ...
+ * ============================================================================
+ * Introduction
+ * ============================================================================
+ *
+ * This plugin teleports the party to specified maps when an encounter occurs.
+ * When the battle ends, the party is teleported back to the previous map.
+ * 
+ * ============================================================================
+ * Set Up Battle Maps
+ * ============================================================================
+ *
+ * Given a map with possible encounters, the list of maps to be teleported to
+ * should be defined inside this map's notebox, using this tag:
+ * 
+ * <LeTBS Encounter Maps>
+ * default: [Map ID], [Map ID], ...
+ * area [X]: [Map ID], [Map ID], ...
+ * area [Y]: [Map ID], [Map ID], ...
+ * area [...]: [Map ID], [Map ID], ...
+ * </LeTBS Encounter Maps>
+ * 
+ * 'area' refers to the terrain tag on which the encounter occurs.
+ * A random map will be selected to teleport the party.
+ * If the encounter doesn't occur on a terrain tag, the 'default' data
+ * will be used.
  */
 //#=============================================================================
 
@@ -37,6 +61,24 @@ var parameters = PluginManager.parameters('LeTBS_Encounters');
 
 
 
+/*-------------------------------------------------------------------------
+* BattleManagerTBS
+-------------------------------------------------------------------------*/
+Lecode.S_TBS.Encounters.oldBattleManagerTBS_stopBattle = BattleManagerTBS.stopBattle;
+BattleManagerTBS.stopBattle = function () {
+    Lecode.S_TBS.Encounters.oldBattleManagerTBS_stopBattle.call(this);
+    if (Lecode.S_TBS.Encounters.requested) {
+        var pos = Lecode.S_TBS.Encounters.oldPos;
+        var mapId = Lecode.S_TBS.Encounters.oldMapId;
+        Lecode.S_TBS.Encounters.requested = false;
+        $gamePlayer.reserveTransfer(mapId, pos[0], pos[1], pos[2], 0);
+        return;
+    }
+};
+
+/*-------------------------------------------------------------------------
+* Scene_Map
+-------------------------------------------------------------------------*/
 Lecode.S_TBS.Encounters.oldSceneMap_updateEncounter = Scene_Map.prototype.updateEncounter;
 Scene_Map.prototype.updateEncounter = function () {
     if ($gamePlayer.executeEncounter() && Lecode.S_TBS.commandOn) {
@@ -60,18 +102,6 @@ Scene_Map.prototype.updateScene = function () {
     Lecode.S_TBS.Encounters.oldSceneMap_updateScene.call(this);
     if (!SceneManager.isSceneChanging() && Lecode.S_TBS.Encounters.requested) {
         SceneManager.push(Scene_Battle);
-    }
-};
-
-Lecode.S_TBS.Encounters.oldBattleManagerTBS_stopBattle = BattleManagerTBS.stopBattle;
-BattleManagerTBS.stopBattle = function () {
-    Lecode.S_TBS.Encounters.oldBattleManagerTBS_stopBattle.call(this);
-    if (Lecode.S_TBS.Encounters.requested) {
-        var pos = Lecode.S_TBS.Encounters.oldPos;
-        var mapId = Lecode.S_TBS.Encounters.oldMapId;
-        Lecode.S_TBS.Encounters.requested = false;
-        $gamePlayer.reserveTransfer(mapId, pos[0], pos[1], pos[2], 0);
-        return;
     }
 };
 

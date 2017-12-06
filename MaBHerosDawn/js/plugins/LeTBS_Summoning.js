@@ -3,7 +3,7 @@
 # LeTBS: Summoning
 # LeTBS_Summoning.js
 # By Lecode
-# Version 1.2
+# Version 1.3
 #-----------------------------------------------------------------------------
 # TERMS OF USE
 #-----------------------------------------------------------------------------
@@ -14,6 +14,7 @@
 # - 1.0 : Initial release
 # - 1.1 : Support the "scope_select" tag
 # - 1.2 : Makes the AI attack non active entities
+# - 1.3 : Merged the active and non-active summon classes
 #=============================================================================
 */
 var Imported = Imported || {};
@@ -24,10 +25,62 @@ Lecode.S_TBS.Summoning = {};
 /*:
  * @plugindesc Adds a summoning system
  * @author Lecode
- * @version 1.2
+ * @version 1.3
  *
  * @help
- * See the documentation
+ * ============================================================================
+ * Introduction
+ * ============================================================================
+ *
+ * This plugin adds various features to summon and control entities in battle.
+ * Summons are defined inside the configuration file and called using
+ * sequence commands.
+ * 
+ * ============================================================================
+ * Setting up Summons
+ * ============================================================================
+ * 
+ * To add a new summon, find the 'Lecode.S_TBS.Config.Summons' module
+ * in the configuration file then add the following data:
+ * 
+ * "ID": {
+ *      turn_order: "after_caster" or "remake",
+ *      visible_in_timeline: true or false,
+ *      kind: "actor" or "enemy",
+ *      id: BATTLER_ID,
+ *      tied_to_caster: true or false,
+ *      stats: {
+ *          default: VALUE,
+ *          mhp: VALUE,
+ *          mmp: VALUE,
+ *          ...
+ *      }
+ *  }
+ * 
+ * If 'turn_order' is "remake", the turn order will be calculated once again, 
+ * to take into account the summoned entity's agility. Otherwise, the entity will be 
+ * summoned in the timeline just after the caster's turn.
+ * If the summoned entity is tied to the caster, he'll die whenever the caster dies.
+ * 
+ * The summoned entity stats can be based on the caster's. Inside the stats option, 
+ * you can setup which stat is based on the caster's same stat. The 'default' option 
+ * is used for all non-specified stats.
+ * For instance:
+ * stats: {
+ *      default: "80%",
+ *      mhp: "200%",
+ *      mat: "+20%"
+ * }
+ * Means that all stats except MHP and MAT will be equal to 80% of the caster same stats. 
+ * The MHP however will be equal to 200% of the caster's MHP. The + sign in the last line 
+ * specifies that the caster will keep his base stat, but will get an extra value from the 
+ * caster. Here, 20% of the caster's MAT is added to the summoned entity's base MAT.
+ * 
+ * ============================================================================
+ * Call A Summon
+ * ============================================================================
+ * 
+ * To call a summon, use the sequence command 'summon: ID, cells'
  */
 //#=============================================================================
 
@@ -38,20 +91,17 @@ Lecode.S_TBS.Summoning = {};
 var parameters = PluginManager.parameters('LeTBS_Summoning');
 
 
-
-
 /*-------------------------------------------------------------------------
 * BattleManagerTBS
 -------------------------------------------------------------------------*/
 Lecode.S_TBS.Summoning.oldBattleManagerTBS_initMembers = BattleManagerTBS.initMembers;
 BattleManagerTBS.initMembers = function () {
-    this._nonActiveSummons = [];
-    this._activeSummons = [];
+    this._summons = [];
     Lecode.S_TBS.Summoning.oldBattleManagerTBS_initMembers.call(this);
 };
 
 BattleManagerTBS.summonEntities = function () {
-    return this._nonActiveSummons.concat(this._activeSummons);
+    return this._summons;
 };
 
 BattleManagerTBS.allySummons = function (battler) {
@@ -75,14 +125,15 @@ BattleManagerTBS.allEntities = function () {
 Lecode.S_TBS.Summoning.oldBattleManagerTBS_allPlayableEntities = BattleManagerTBS.allPlayableEntities;
 BattleManagerTBS.allPlayableEntities = function () {
     return Lecode.S_TBS.Summoning.oldBattleManagerTBS_allPlayableEntities.call(this)
-        .concat(this._activeSummons);
+        .concat(this.summonEntities().filter(function(e){
+            return !e.isNonActiveSummon();
+        }));
 };
 
 Lecode.S_TBS.Summoning.oldBattleManagerTBS_destroyEntity = BattleManagerTBS.destroyEntity;
-BattleManagerTBS.destroyEntity = function (entity) {
-    Lecode.S_TBS.Summoning.oldBattleManagerTBS_destroyEntity.call(this, entity);
-    LeUtilities.removeInArray(this._nonActiveSummons, entity);
-    LeUtilities.removeInArray(this._activeSummons, entity);
+BattleManagerTBS.destroyEntity = function (entity, removeTurn) {
+    Lecode.S_TBS.Summoning.oldBattleManagerTBS_destroyEntity.call(this, entity, removeTurn);
+    LeUtilities.removeInArray(this._summons, entity);
 };
 
 BattleManagerTBS.newSummon = function (caster, summonId, cell) {
@@ -92,14 +143,10 @@ BattleManagerTBS.newSummon = function (caster, summonId, cell) {
     var id = summonData.id;
     var battler = summonData.kind === "actor" ? new Game_Actor(id) : new Game_Enemy(id, 0, 0);
     var summon;
-    if (summonData.active) {
-        summon = new TBSActiveSummon(battler, layer, cell, summonData);
-        this._activeSummons.push(summon);
+    summon = new TBSSummonEntity(battler, layer, cell, summonData);
+     this._summons.push(summon);
+     if (summonData.turn_order !== "none")
         this.updateTurnOrderForSummon(caster, summon, summonData.turn_order);
-    } else {
-        summon = new TBSNonActiveSummon(battler, layer, cell, summonData);
-        this._nonActiveSummons.push(summon);
-    }
     summon.onSummoned(caster, summonData.stats);
 };
 
@@ -127,22 +174,11 @@ BattleManagerTBS.updateTurnOrderForSummon = function (caster, summon, type) {
         this._turnOrder, this._activeIndex), 300);
 };
 
-BattleManagerTBS.onActiveSummonDeath = function (entity) {
+BattleManagerTBS.onSummonDeath = function (entity) {
     var summonData = entity._summonData;
-    var summonIndex;
-    for (var i = 0; i < this._turnOrder.length; i++) {
-        var e = this._turnOrder[i];
-        if (entity === e)
-            summonIndex = i;
-    }
+    this.destroyEntity(entity);
     if (summonData.turn_order === "remake")
         this.determineTurnOrder();
-    else
-        LeUtilities.removeInArray(this._turnOrder, entity);
-    if (this._activeIndex >= summonIndex)
-        this._activeIndex--;
-    this._turnOrderVisual.updateOnSummon(this._turnOrder, this._activeIndex);
-    LeUtilities.removeInArray(this._activeSummons, entity);
 };
 
 BattleManagerTBS.checkTiedSummonsonDeath = function (entity) {
@@ -184,8 +220,8 @@ BattleManagerTBS.selectScopeTargets = function (cells, type, user) {
 * TBSAiManager
 -------------------------------------------------------------------------*/
 Lecode.S_TBS.Summoning.oldTBSAiManager_process = TBSAiManager.prototype.process;
-TBSAiManager.prototype.process = function (entity) {
-    Lecode.S_TBS.Summoning.oldTBSAiManager_process.call(this, entity);
+TBSAiManager.prototype.process = function () {
+    Lecode.S_TBS.Summoning.oldTBSAiManager_process.apply(this, arguments);
     this._offenseOnSummonsDone = false;
 };
 
@@ -207,12 +243,11 @@ TBSAiManager.prototype.makeOffenseOnSummonsData = function () {
     var objects = [];
     for (var i = 0; i < skills.length; i++) {
         var skill = skills[i];
-        if (!this._entity.rpgObject().leTbs_aiNoAttack && skill.id === this._battler.attackSkillId() || skill.leTbs_aiConfig.type.match("offense")) {
+        if (!this._entity.rpgObject().TagsLetbs.aiNoAttack && skill.id === this._battler.attackSkillId() || skill.TagsLetbsAi.type.match("offense")) {
             objects.push(skill);
         }
     }
     this._offenseOnSummonsDone = true;
-    console.log("party:", party);
     this.makeActionData("offense", party, objects);
 };
 
@@ -225,6 +260,7 @@ TBSTurnOrderVisual.prototype.updateOnSummon = function (newOrder, oldIndex) {
     this._activeIndex = oldIndex;
     this.setPositions();
     this.updateOrderState();
+	this.updateTurnNumbers();
 };
 
 
@@ -239,134 +275,30 @@ TBSSequenceManager.prototype.commandSummon = function (param) {
     cells.forEach(function (cell) {
         BattleManagerTBS.newSummon(this.getUser(), id, cell);
     }.bind(this));
+
+    return {};
 };
 
 
 /*-------------------------------------------------------------------------
-* TBSNonActiveSummon
+* TBSSummonEntity
 -------------------------------------------------------------------------*/
-function TBSNonActiveSummon() {
+function TBSSummonEntity() {
     this.initialize.apply(this, arguments);
 }
-TBSNonActiveSummon.prototype = Object.create(TBSEntity.prototype);
-TBSNonActiveSummon.prototype.constructor = TBSNonActiveSummon;
+TBSSummonEntity.prototype = Object.create(TBSEntity.prototype);
+TBSSummonEntity.prototype.constructor = TBSSummonEntity;
 
-TBSNonActiveSummon.prototype.initialize = function (battler, layer, cell, summonData) {
+TBSSummonEntity.prototype.initialize = function (battler, layer, cell, summonData) {
     TBSEntity.prototype.initialize.call(this, battler, layer);
     this.setCell(cell);
     this._summonData = summonData;
-    this.startAnimation();
 };
 
-TBSNonActiveSummon.prototype.createSprite = function (battler, layer) {
-    this._sprite = new TBSNonActiveSummon_Sprite(battler, this);
-    this._layer = layer;
-    layer.addChild(this._sprite);
-};
-
-TBSNonActiveSummon.prototype.startAnimation = function () {
-    var animId;
-    if (this._summonData.body_anim instanceof Array)
-        animId = LeUtilities.getRandomValueInArray(this._summonData.body_anim);
-    else
-        animId = this._summonData.body_anim;
-    var animation = $dataAnimations[animId];
-    var sprite = new TBSNonActiveSummon_Animation();
-    sprite.setup(this, animation, false, 0, this.getCell());
-    this._layer.addChild(sprite);
-    this._animationSprite = sprite;
-};
-
-TBSNonActiveSummon.prototype.stopAnimation = function () {
-    this._animationSprite._loop = false;
-    this._animationSprite._duration = 0;
-    this._layer.removeChild(this._animationSprite);
-};
-
-TBSNonActiveSummon.prototype.onDeath = function () {
+TBSSummonEntity.prototype.onDeath = function () {
     TBSEntity.prototype.onDeath.call(this);
-    this.stopAnimation();
-    BattleManagerTBS.getLayer("animations").newAnimation(this.getCollapseAnimation(), false, 0, this.getCell());
+    BattleManagerTBS.onSummonDeath(this);
     BattleManagerTBS.destroyEntity(this);
-};
-
-TBSNonActiveSummon.prototype.startSequence = function (id, action) {
-};
-
-
-/*-------------------------------------------------------------------------
-* TBSNonActiveSummon_Animation
--------------------------------------------------------------------------*/
-function TBSNonActiveSummon_Sprite() {
-    this.initialize.apply(this, arguments);
-}
-
-TBSNonActiveSummon_Sprite.prototype = Object.create(TBSEntity_Sprite.prototype);
-TBSNonActiveSummon_Sprite.prototype.constructor = TBSNonActiveSummon_Sprite;
-
-TBSNonActiveSummon_Sprite.prototype.createBitmaps = function () {
-    var config = this.getConfig();
-    config.forEach(function (info) {
-        var pose = info[0];
-        this._maxFrame[pose] = 0;
-        this._bitmaps[pose] = new Bitmap(48, 48);
-    }.bind(this));
-    if (!this.isValidPose("dead")) {
-        this._maxFrame["dead"] = 0;
-        this._bitmaps["dead"] = new Bitmap(48, 48);
-    }
-};
-
-TBSNonActiveSummon_Sprite.prototype.isReady = function () {
-    return true;
-};
-
-
-/*-------------------------------------------------------------------------
-* TBSNonActiveSummon_Animation
--------------------------------------------------------------------------*/
-function TBSNonActiveSummon_Animation() {
-    this.initialize.apply(this, arguments);
-}
-TBSNonActiveSummon_Animation.prototype = Object.create(Sprite_TBSAnimation.prototype);
-TBSNonActiveSummon_Animation.prototype.constructor = TBSNonActiveSummon_Animation;
-
-TBSNonActiveSummon_Animation.prototype.initialize = function () {
-    Sprite_TBSAnimation.prototype.initialize.call(this, arguments);
-    this._loop = true;
-};
-
-TBSNonActiveSummon_Animation.prototype.update = function () {
-    Sprite_TBSAnimation.prototype.update.call(this);
-    if (!this.isPlaying() && this._animation && this._loop) {
-        this.setupDuration();
-    }
-};
-
-
-/*-------------------------------------------------------------------------
-* TBSActiveSummon
--------------------------------------------------------------------------*/
-function TBSActiveSummon() {
-    this.initialize.apply(this, arguments);
-}
-TBSActiveSummon.prototype = Object.create(TBSEntity.prototype);
-TBSActiveSummon.prototype.constructor = TBSActiveSummon;
-
-TBSActiveSummon.prototype.initialize = function (battler, layer, cell, summonData) {
-    TBSEntity.prototype.initialize.call(this, battler, layer);
-    this.setCell(cell);
-    this._summonData = summonData;
-};
-
-TBSActiveSummon.prototype.playableByAI = function () {
-    return TBSEntity.prototype.playableByAI.call(this) || this._summonData.type === "ai_playable";
-};
-
-TBSActiveSummon.prototype.onDeath = function () {
-    TBSEntity.prototype.onDeath.call(this);
-    this.destroy();
-    BattleManagerTBS.onActiveSummonDeath(this);
 };
 
 
@@ -377,7 +309,7 @@ TBSEntity.prototype.isSummon = function () {
     return !!this._summonData;
 };
 TBSEntity.prototype.isNonActiveSummon = function () {
-    return this.isSummon() && !this._summonData.active;
+    return this.isSummon() && this._summonData.turn_order === "none";
 };
 
 TBSEntity.prototype.onSummoned = function (caster, statesData) {

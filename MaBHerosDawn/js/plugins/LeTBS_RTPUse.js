@@ -3,7 +3,7 @@
 # LeTBS: RTP Use
 # LeTBS_RTPUse.js
 # By Lecode
-# Version 1.1
+# Version 1.2
 #-----------------------------------------------------------------------------
 # TERMS OF USE
 #-----------------------------------------------------------------------------
@@ -13,17 +13,46 @@
 #-----------------------------------------------------------------------------
 # - 1.0 : Initial release
 # - 1.1 : Status sprites are now correctly setup
+# - 1.2 : Support sprite's name and character name changes
 #=============================================================================
 */
 var Lecode = Lecode || {};
 Lecode.S_TBS.RTPUse = {};
 /*:
- * @plugindesc Automatically use RPT ressources for LeTBS
+ * @plugindesc Automatically uses RPT ressources for LeTBS
  * @author Lecode
- * @version 1.1
+ * @version 1.2
  *
  * @help
- * ...
+ * ============================================================================
+ * Introduction
+ * ============================================================================
+ *
+ * This plugin adds various tags to use RTP graphics automatically for entities
+ * and some displays.
+ * 
+ * ============================================================================
+ * Use Characters For Entities
+ * ============================================================================
+ *
+ * In order for your actors or enemies to use a character as a graphic, use the
+ * following instructions inside LeTBS tag:
+ * 
+ * use_character
+ * character_name: [Name]
+ * character_index: [Index]
+ * 
+ * The last two instructions are only to be used for enemies, as the characters
+ * for actors are already knew.
+ * 
+ * ============================================================================
+ * Auto Graphic Use
+ * ============================================================================
+ *
+ * Some tags allow to automatically use an entity's graphic on the huds:
+ * 
+ * auto_turn_order_face     Uses the 'idle' graphic on the turn order hud
+ * auto_status_sprite       Uses the 'idle' graphic in the status window
  */
 //#=============================================================================
 
@@ -37,13 +66,29 @@ var parameters = PluginManager.parameters('LeTBS_RTPUse');
 * TBSEntity
 -------------------------------------------------------------------------*/
 TBSEntity.prototype.getCharacterName = function () {
-    return this.battler().isActor() && this.rpgObject().leTbs_useCharacter ? this.battler().characterName()
-        : this.rpgObject().leTbs_characterName;
+    if (!this.battler().hasLeTBSTag("useCharacter")) return null;
+    if (this.hasBlankSprite()) return null;
+    if (this.battler().isActor())
+        return this.battler().getLeTBSTagStringValue("characterName", this.battler().characterName());
+    return this.battler().getLeTBSTagStringValue("characterName");
 };
 
 TBSEntity.prototype.getCharacterIndex = function () {
-    return this.battler().isActor() && this.rpgObject().leTbs_useCharacter ? this.battler().characterIndex()
-        : this.rpgObject().leTbs_characterIndex;
+    if (!this.battler().hasLeTBSTag("useCharacter")) return null;
+    if (this.hasBlankSprite()) return null;
+    if (this.battler().isActor())
+        return this.battler().getLeTBSTagStringValue("characterIndex", this.battler().characterIndex());
+    return this.battler().getLeTBSTagStringValue("characterIndex");
+};
+
+Lecode.S_TBS.RTPUse.oldTBSEntity_checkFilenameChange = TBSEntity.prototype.checkFilenameChange;
+TBSEntity.prototype.checkFilenameChange = function (state) {
+    var needChange = !!state.TagsLetbs.characterName || !!state.TagsLetbs.characterIndex;
+    if (needChange) {
+        this.applyFilenameChange();
+        return;
+    }
+    Lecode.S_TBS.RTPUse.oldTBSEntity_checkFilenameChange.call(this, state);
 };
 
 
@@ -53,6 +98,8 @@ TBSEntity.prototype.getCharacterIndex = function () {
 Lecode.S_TBS.RTPUse.oldTBSEntitySprite_initialize = TBSEntity_Sprite.prototype.initialize;
 TBSEntity_Sprite.prototype.initialize = function (battler, entity) {
     Lecode.S_TBS.RTPUse.oldTBSEntitySprite_initialize.call(this, battler, entity);
+    this._characterName = null;
+    this._charaIndex = null;
     this._frameOrder = [0, 1, 2, 1];
     this._frameOrderIndex = 0;
 };
@@ -88,6 +135,8 @@ TBSEntity_Sprite.prototype.processBitmapsConfig = function (info, hue) {
 TBSEntity_Sprite.prototype.createCharaBitmap = function (fbitmap) {
     var charaName = this._entity.getCharacterName();
     var charaIndex = this._entity.getCharacterIndex();
+    this._characterName = charaName;
+    this._charaIndex = charaIndex;
     var big = ImageManager.isBigCharacter(charaName);
     if (big) {
         throw new Error("LeTBS_RTPUse: Doesn't handle big characters for now");
@@ -110,7 +159,7 @@ TBSEntity_Sprite.prototype.createCharaBitmap = function (fbitmap) {
 -------------------------------------------------------------------------*/
 Lecode.S_TBS.RTPUse.oldTBSTurnOrderVisual_getSpriteBitmap = TBSTurnOrderVisual.prototype.getSpriteBitmap;
 TBSTurnOrderVisual.prototype.getSpriteBitmap = function (entity) {
-    var auto = entity.rpgObject().leTbs_autoTurnOrderFace;
+    var auto = entity.battler().hasLeTBSTag("autoTurnOrderFace");
     if (auto) {
         var sprite = entity._sprite;
         var fbitmap = sprite._bitmaps["idle"];
@@ -130,7 +179,7 @@ TBSTurnOrderVisual.prototype.getSpriteBitmap = function (entity) {
 -------------------------------------------------------------------------*/
 Lecode.S_TBS.RTPUse.oldWindowTBSStatus_drawSprite = Window_TBSStatus.prototype.drawSprite;
 Window_TBSStatus.prototype.drawSprite = function (x, y) {
-    var auto = this._entity.rpgObject().leTbs_autoStatusSprite;
+    var auto = this._entity.battler().hasLeTBSTag("autoStatusSprite");
     if (auto) {
         var sprite = this._entity._sprite;
         var fbitmap = sprite._bitmaps["idle"];
@@ -143,53 +192,4 @@ Window_TBSStatus.prototype.drawSprite = function (x, y) {
         return;
     }
     Lecode.S_TBS.RTPUse.oldWindowTBSStatus_drawSprite.call(this, x, y);
-};
-
-
-/*-------------------------------------------------------------------------
-* DataManager
--------------------------------------------------------------------------*/
-Lecode.S_TBS.RTPUse.oldDataManager_processLeTBSTags = DataManager.processLeTBSTags;
-DataManager.processLeTBSTags = function () {
-    Lecode.S_TBS.RTPUse.oldDataManager_processLeTBSTags.call(this);
-    this.processLeTBS_RTPUseTagsForBattlers();
-};
-
-DataManager.processLeTBS_RTPUseTagsForBattlers = function () {
-    var groups = [$dataActors, $dataEnemies, $dataClasses];
-    for (var i = 0; i < groups.length; i++) {
-        var group = groups[i];
-        for (var j = 1; j < group.length; j++) {
-            var obj = group[j];
-            var notedata = obj.note.split(/[\r\n]+/);
-            var letbs = false;
-
-            obj.leTbs_characterName = null;
-            obj.leTbs_characterIndex = null;
-            obj.leTbs_useCharacter = false;
-            obj.leTbs_autoTurnOrderFace = false;
-            obj.leTbs_autoStatusSprite = false;
-
-            for (var k = 0; k < notedata.length; k++) {
-                var line = notedata[k];
-                if (line.match(/<letbs>/i))
-                    letbs = true;
-                else if (line.match(/<\/letbs>/i))
-                    letbs = false;
-
-                if (letbs) {
-                    if (line.match(/character_name\s?:\s?(.+)/i))
-                        obj.leTbs_characterName = String(RegExp.$1);
-                    else if (line.match(/character_index\s?:\s?(.+)/i))
-                        obj.leTbs_characterIndex = Number(RegExp.$1);
-                    else if (line.match(/use_character/i))
-                        obj.leTbs_useCharacter = true;
-                    else if (line.match(/auto_turn_order_face/i))
-                        obj.leTbs_autoTurnOrderFace = true;
-                    else if (line.match(/auto_status_sprite/i))
-                        obj.leTbs_autoStatusSprite = true;
-                }
-            }
-        }
-    }
 };

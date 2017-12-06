@@ -21,7 +21,7 @@ Imported.LeTBS_MultiSelection = true;
 var Lecode = Lecode || {};
 Lecode.S_TBS.MultiSelection = {};
 /*:
- * @plugindesc Adds extra selections
+ * @plugindesc Adds extra selections to skills and items
  * @author Lecode
  * @version 1.1
  *
@@ -30,7 +30,41 @@ Lecode.S_TBS.MultiSelection = {};
  * @default #E4A110
  *
  * @help
- * See the documentation
+ * ============================================================================
+ * Introduction
+ * ============================================================================
+ *
+ * This plugin adds the possibility to select multiple AoEs for an action.
+ * The selected areas are then used in the sequences for advanced effects.
+ * 
+ * ============================================================================
+ * Set Up A Multi Selection
+ * ============================================================================
+ * 
+ * You can activate this feature for a given skill by using this instruction
+ * inside LeTBS tag:
+ * [X] selections: [Type]; [Help Text]
+ * 
+ * This will define that the user can select X AoEs for this skill,
+ * and how they will be processed will depend on [Type].
+ * [Help Text] is optional.
+ * [Type] can be either 'append' or 'distinct'.
+ * With append, the final AoE is a merge of the selections. With distinct, 
+ * each selection is unique and can be used differently during sequences,
+ * with a loop. (using the sequence command 'call_for_every_mscope')
+ * 
+ * Feel free to look at the demo skills 'Mega Sparkle' and 'Multi Fire'
+ * for better understanding.
+ * 
+ * ============================================================================
+ * Prompt Selections During Sequences
+ * ============================================================================
+ * 
+ * The add-on adds a mean to request a selection during sequences. The sequence 
+ * command "request_selection: skill(ID)" draws the scope of the designated 
+ * skill and wait for the user to select an AoE.
+ * 
+ * Check the demo skill "Ally Teleport" for better understanding.
  */
 //#=============================================================================
 
@@ -52,7 +86,7 @@ BattleManagerTBS.onSkillSelected = function () {
     var skill = LeUtilities.getScene()._windowSkill.item();
     this._multiSelectionTimes = 0;
     this._multiSelectionScopes = [];
-    this._multiSelectionData = skill.leTbs_multiSelection;
+    this._multiSelectionData = skill.TagsLetbs.multiSelection;
     if (this._multiSelectionData && this._multiSelectionData.help) {
         LeUtilities.getScene().showHelpWindow();
         LeUtilities.getScene()._helpWindow.setText(this._multiSelectionData.help);
@@ -65,7 +99,7 @@ BattleManagerTBS.onItemSelected = function () {
     var item = LeUtilities.getScene()._windowItem.item();
     this._multiSelectionTimes = 0;
     this._multiSelectionScopes = [];
-    this._multiSelectionData = item.leTbs_multiSelection;
+    this._multiSelectionData = item.TagsLetbs.multiSelection;
     if (this._multiSelectionData && this._multiSelectionData.help) {
         LeUtilities.getScene().showHelpWindow();
         LeUtilities.getScene()._helpWindow.setText(this._multiSelectionData.help);
@@ -78,7 +112,7 @@ BattleManagerTBS.processCommandCallSkill = function (id) {
     var skill = $dataSkills[id];
     this._multiSelectionTimes = 0;
     this._multiSelectionScopes = [];
-    this._multiSelectionData = skill.leTbs_multiSelection;
+    this._multiSelectionData = skill.TagsLetbs.multiSelection;
     Lecode.S_TBS.MultiSelection.oldBattleManagerTBS_processCommandCallSkill.call(this, id);
 };
 
@@ -226,14 +260,6 @@ BattleManagerTBS.battlePhaseOnInputUp = function () {
 /*-------------------------------------------------------------------------
 * TBSSequenceManager
 -------------------------------------------------------------------------*/
-TBSSequenceManager.prototype.baseAoE = function () {
-    return BattleManagerTBS._actionAoE;
-};
-
-TBSSequenceManager.prototype.baseCursorCell = function () {
-    return BattleManagerTBS._activeCell;
-};
-
 TBSSequenceManager.prototype.commandCallForEveryMscope = function (param) {
     var seq = param[0];
     var sortType = param[1] || "random";
@@ -247,15 +273,16 @@ TBSSequenceManager.prototype.commandCallForEveryMscope = function (param) {
     this._savedCells["mscope_center_base"] = mScopes.map(function (data) {
         return data.center;
     });
-    console.log("mData:", mData);
     for (var i = 0; i < mData.times; i++) {
         for (var j = seqArray.length - 1; j >= 0; j--) {
             var command = seqArray[j];
             this._sequence.unshift(command);
         }
-        this._sequence.unshift("save_cells: mscope_aoe, saved(mscope_aoe_base), shift");
-        this._sequence.unshift("save_cells: mscope_center, saved(mscope_center_base), shift");
+        this._sequence.table.unshift("save_cells: mscope_aoe, saved(mscope_aoe_base), shift");
+        this._sequence.table.unshift("save_cells: mscope_center, saved(mscope_center_base), shift");
     }
+
+    return {};
 };
 
 TBSSequenceManager.prototype.commandRequestSelection = function (param) {
@@ -263,55 +290,35 @@ TBSSequenceManager.prototype.commandRequestSelection = function (param) {
     var obj = this.readObject(objData);
 
     BattleManagerTBS.requestSelection(obj, this.getUser());
-    this._waitFunction = function () {
-        return BattleManagerTBS._subPhase === "request_selection";
+
+    return {
+        requestWait: true,
+        waitWhile: function () {
+            return BattleManagerTBS._subPhase === "request_selection";
+        }
     };
 };
 
 
 /*-------------------------------------------------------------------------
-* DataManager
+* Scene_Boot
 -------------------------------------------------------------------------*/
-Lecode.S_TBS.MultiSelection.oldDataManager_processLeTBSTags = DataManager.processLeTBSTags;
-DataManager.processLeTBSTags = function () {
-    Lecode.S_TBS.MultiSelection.oldDataManager_processLeTBSTags.call(this);
-    this.processLeTBSMultiSelectionTags();
-};
-
-DataManager.processLeTBSMultiSelectionTags = function () {
-    var groups = [$dataSkills, $dataItems];
-    for (var i = 0; i < groups.length; i++) {
-        var group = groups[i];
-        for (var j = 1; j < group.length; j++) {
-            var obj = group[j];
-            var notedata = obj.note.split(/[\r\n]+/);
-            var letbs = false;
-
-            obj.leTbs_multiSelection = null;
-
-            for (var k = 0; k < notedata.length; k++) {
-                var line = notedata[k];
-                if (line.match(/<letbs>/i))
-                    letbs = true;
-                else if (line.match(/<\/letbs>/i))
-                    letbs = false;
-
-                if (letbs) {
-                    if (line.match(/(\d+) selections\s?:\s?(.+)\;(.+)/i)) {
-                        obj.leTbs_multiSelection = {
-                            times: Number(RegExp.$1),
-                            mode: RegExp.$2,
-                            help: RegExp.$3.trim()
-                        };
-                    } else if (line.match(/(\d+) selections\s?:\s?(.+)/i)) {
-                        obj.leTbs_multiSelection = {
-                            times: Number(RegExp.$1),
-                            mode: RegExp.$2,
-                            help: null
-                        };
-                    }
-                }
-            }
-        }
+Lecode.S_TBS.MultiSelection.oldSceneBoot_parseLeTBSTag = Scene_Boot.prototype.parseLeTBSTag;
+Scene_Boot.prototype.parseLeTBSTag = function (prop, obj, tags) {
+    Lecode.S_TBS.MultiSelection.oldSceneBoot_parseLeTBSTag.call(this, prop, obj, tags);
+    var element = tags[prop];
+    var str = prop + ":" + element;
+    if (str.match(/(\d+)\sselections\s?:\s?(.+)\;(.+)/i)) {
+        tags.multiSelection = {
+            times: Number(RegExp.$1),
+            mode: RegExp.$2,
+            help: RegExp.$3.trim()
+        };
+    } else if (str.match(/(\d+)\sselections\s?:\s?(.+)/i)) {
+        tags.multiSelection = {
+            times: Number(RegExp.$1),
+            mode: RegExp.$2,
+            help: null
+        };
     }
 };

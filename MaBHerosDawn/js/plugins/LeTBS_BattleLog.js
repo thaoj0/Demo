@@ -17,12 +17,22 @@
 var Lecode = Lecode || {};
 Lecode.S_TBS.LogWin = {};
 /*:
- * @plugindesc BattleLog Support for LeTBS
+ * @plugindesc BattleLog support for LeTBS
  * @author Lecode
  * @version 1.0
  *
  * @help
- * ...
+ * ============================================================================
+ * Introduction
+ * ============================================================================
+ *
+ * This plugin allows LeTBS to support the battle log.
+ * 
+ * ============================================================================
+ * WARNING: Work In Progress
+ * ============================================================================
+ *
+ * The plugin is in WIP state currently.
  */
 //#=============================================================================
 
@@ -35,6 +45,9 @@ var parameters = PluginManager.parameters('LeTBS');
 Lecode.S_TBS.LogWin.useEXVersion = false;
 
 
+/*-------------------------------------------------------------------------
+* BattleManagerTBS
+-------------------------------------------------------------------------*/
 Lecode.S_TBS.LogWin.oldBattleManagerTBS_onNewTurnOrder = BattleManagerTBS.onNewTurnOrder;
 BattleManagerTBS.onNewTurnOrder = function () {
     Lecode.S_TBS.LogWin.oldBattleManagerTBS_onNewTurnOrder.call(this);

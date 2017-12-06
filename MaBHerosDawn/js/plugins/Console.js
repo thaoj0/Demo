@@ -1,7 +1,6 @@
 //=============================================================================
 // ShowConsoleOnBoot.js
 //=============================================================================
-
 /*:
 * Why did they take this feature out of RMMV? This, along with the built-in
 * script editor where you could see all the default scripts was one of the
