@@ -510,10 +510,10 @@ Window_TBSStatus.prototype.refresh = function () {
     //y += this.lineHeight() - 8;
     this.S_TBSdrawActorIcons(this._entity.battler(), x, y, Window_Base._iconWidth * max);
     
-    y += this.lineHeight() - 8;
-    y += this.lineHeight() - 8;
+    //y += this.lineHeight() - 8;
+    //y += this.lineHeight() - 8;
     //stats
-    x = 2;
+    //x = 2;
     y1 = y + this.lineHeight() - 8;
     this.drawTextEx("\\i[57]", x, y1); // Attack
     this.drawTextEx(this._entity.battler().atk.toString(), x + 60, y1);
