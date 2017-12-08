@@ -487,8 +487,8 @@ Window_TBSStatus.prototype.refresh = function () {
     this.drawActorMp(this._entity.battler(), x, y, 130);
     //- TP Gauge
     if (Lecode.S_TBS.Windows.statusWindowShowTP) {
-        y += this.lineHeight() / 4 + 4;
-        this._gaugeHeight = 6;
+        y += this.lineHeight() - 8;// / 4 + 4;
+        //this._gaugeHeight = 6;
         this.drawActorTp(this._entity.battler(), x, y, 130);
     }
     //- Move Points
@@ -503,11 +503,96 @@ Window_TBSStatus.prototype.refresh = function () {
         }
     }
     // - States
-    x = 2;
+    x = Lecode.S_TBS.Windows.statusWindowSpriteBoxW;
+    //x = 2;
     var max = Lecode.S_TBS.Windows.statusWindowMaxStates;
-    this.drawActorIcons(this._entity.battler(), x, y, Window_Base._iconWidth * max);
+    //this.drawActorIcons(this._entity.battler(), x, y, Window_Base._iconWidth * max);
+    //y += this.lineHeight() - 8;
+    this.S_TBSdrawActorIcons(this._entity.battler(), x, y, Window_Base._iconWidth * max);
+    
+    y += this.lineHeight() - 8;
+    y += this.lineHeight() - 8;
+    //stats
+    x = 2;
+    y1 = y + this.lineHeight() - 8;
+    this.drawTextEx("\\i[57]", x, y1); // Attack
+    this.drawTextEx(this._entity.battler().atk.toString(), x + 60, y1);
+    
+    y1 += 32;
+    this.drawTextEx("\\i[58]", x, y1); // Tech
+    this.drawTextEx(this._entity.battler().def.toString(), x + 60, y1);
+    
+    y1 += 32;
+    this.drawTextEx("\\i[59]", x, y1); // Support
+    this.drawTextEx(this._entity.battler().mat.toString(), x + 60, y1);
+    
+    y1 += 32;
+    this.drawTextEx("\\i[60]", x, y1); // Spirit
+    this.drawTextEx(this._entity.battler().mdf.toString(), x + 60, y1);
+    
+    y1 += 32;
+    this.drawTextEx("\\i[61]", x, y1); // Agility
+    this.drawTextEx(this._entity.battler().agi.toString(), x + 60, y1);
+    
+    y1 += 32;
+    this.drawTextEx("\\i[62]", x, y1); // Move Cost
+    this.drawTextEx(this._entity.battler().luk.toString(), x + 60, y1);
+    
+    y1 += 32;
+    this.drawTextEx("\\i[1056]", x, y1); // Hit
+    this.drawTextEx(this._entity.battler().hit.toString(), x + 60, y1);
+    
+    y1 += 32;
+    this.drawTextEx("\\i[1058]", x, y1); // Evade
+    this.drawTextEx(this._entity.battler().eva.toString(), x + 60, y1);
+    
+    y1 += 32;
+    this.drawTextEx("\\i[1061]", x, y1); // Parry
+    this.drawTextEx(this._entity.battler().cnt.toString(), x + 60, y1);
+    
+    x = Lecode.S_TBS.Windows.statusWindowSpriteBoxW;
+    y2 = y + this.lineHeight() - 8;
+    this.drawTextEx("\\i[1074]", x + 30, y2); // Defense
+    this.drawTextEx(this._entity.battler().pdr.toString(), x + 90, y2);
+    
+    y2 += 32;
+    this.drawTextEx("\\i[1072]", x + 30, y2); // Mastery
+    this.drawTextEx(this._entity.battler().tcr.toString(), x + 90, y2);
+    
+    y2 += 32;
+    this.drawTextEx("\\i[1073]", x + 30, y2); // Skill Cost
+    this.drawTextEx(this._entity.battler().mcr.toString(), x + 90, y2);
+    
+    y2 += 32;
+    this.drawTextEx("\\i[1075]", x + 30, y2); // HP Regen
+    this.drawTextEx(this._entity.battler().hrg.toString(), x + 90, y2);
+    
+    y2 += 32;
+    this.drawTextEx("\\i[1076]", x + 30, y2); // MP Regen
+    this.drawTextEx(this._entity.battler().mrg.toString(), x + 90, y2);
+    
+    y2 += 32;
+    this.drawTextEx("\\i[1077]", x + 30, y2); // TP Regen
+    this.drawTextEx(this._entity.battler().trg.toString(), x + 90, y2);
+    //this.drawBasicInfo(this._entity.battler(), x, y);
+};
+//------------------------------------MAB Edits--------------------------------
+Window_Base.prototype.S_TBSdrawActorIcons = function(actor, x, y, width) {
+    width = width || 144;
+    var icons = actor.allIcons().slice(0, Math.floor(width / Window_Base._iconWidth));
+    var z = this.lineHeight();
+    for (var i = 0; i < icons.length; i++) {
+        this.drawIcon(icons[i], x + Window_Base._iconWidth * (i % 4), y + 2 + z);
+    }
 };
 
+Window_Base.prototype.drawBasicInfo = function(actor, x, y) {
+    var lineHeight = this.lineHeight();
+    this.drawActorIcons(actor, x, y + lineHeight * 1);
+    this.drawActorHp(actor, x, y + lineHeight * 2);
+    this.drawActorMp(actor, x, y + lineHeight * 3);
+};
+//----------------------------------------------------------------------------
 Window_TBSStatus.prototype.drawSprite = function () {
     var bitmap = ImageManager.loadLeTBSStatus(this._entity.filenameID());
     var window = this;
@@ -519,10 +604,19 @@ Window_TBSStatus.prototype.drawSprite = function () {
 };
 
 Window_TBSStatus.prototype.drawActorTp = function (actor, x, y, width) {
+    //width = width || 96;
+    //var color1 = this.tpGaugeColor1();
+    //var color2 = this.tpGaugeColor2();
+    //this.drawGauge(x, y, width, actor.tpRate(), color1, color2);
+    
     width = width || 96;
     var color1 = this.tpGaugeColor1();
     var color2 = this.tpGaugeColor2();
     this.drawGauge(x, y, width, actor.tpRate(), color1, color2);
+    this.changeTextColor(this.systemColor());
+    this.drawText(TextManager.tpA, x, y, 44);
+    this.drawCurrentAndMax(actor.tp, actor.maxTp(), x, y, width,
+                           this.tpColor(actor), this.normalColor());
 };
 
 Window_TBSStatus.prototype.gaugeHeight = function () {
