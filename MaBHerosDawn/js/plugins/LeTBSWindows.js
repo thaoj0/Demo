@@ -448,7 +448,7 @@ Window_TBSStatus.prototype.windowHeight = function () {
 
 Window_TBSStatus.prototype.slide = function () {
     this._sliding = true;
-    this.x = -this.width;
+    // this removes sliding effect MAB //this.x = -this.width;
 };
 
 Window_TBSStatus.prototype.update = function () {
@@ -514,66 +514,58 @@ Window_TBSStatus.prototype.refresh = function () {
     //y += this.lineHeight() - 8;
     //stats
     //x = 2;
-    y1 = y + this.lineHeight() - 8;
-    this.drawTextEx("\\i[57]", x, y1); // Attack
-    this.drawTextEx(this._entity.battler().atk.toString(), x + 60, y1);
+    x1 = x + 130;
+    //y1 = y + this.lineHeight() - 8;
+    y1 = this.lineHeight() - 4;
+    this.drawTextEx("\\i[57]", x1, y1); // Attack
+    this.drawTextEx(this._entity.battler().atk.toString(), x1 + 32, y1);
     
     y1 += 32;
-    this.drawTextEx("\\i[58]", x, y1); // Tech
-    this.drawTextEx(this._entity.battler().def.toString(), x + 60, y1);
+    this.drawTextEx("\\i[58]", x1, y1); // Tech
+    this.drawTextEx(this._entity.battler().def.toString(), x1 + 32, y1);
     
     y1 += 32;
-    this.drawTextEx("\\i[59]", x, y1); // Support
-    this.drawTextEx(this._entity.battler().mat.toString(), x + 60, y1);
+    this.drawTextEx("\\i[59]", x1, y1); // Support
+    this.drawTextEx(this._entity.battler().mat.toString(), x1 + 32, y1);
     
-    y1 += 32;
-    this.drawTextEx("\\i[60]", x, y1); // Spirit
-    this.drawTextEx(this._entity.battler().mdf.toString(), x + 60, y1);
-    
-    y1 += 32;
-    this.drawTextEx("\\i[61]", x, y1); // Agility
-    this.drawTextEx(this._entity.battler().agi.toString(), x + 60, y1);
-    
-    y1 += 32;
-    this.drawTextEx("\\i[62]", x, y1); // Move Cost
-    this.drawTextEx(this._entity.battler().luk.toString(), x + 60, y1);
-    
-    y1 += 32;
-    this.drawTextEx("\\i[1056]", x, y1); // Hit
-    this.drawTextEx(this._entity.battler().hit.toString(), x + 60, y1);
-    
-    y1 += 32;
-    this.drawTextEx("\\i[1058]", x, y1); // Evade
-    this.drawTextEx(this._entity.battler().eva.toString(), x + 60, y1);
-    
-    y1 += 32;
-    this.drawTextEx("\\i[1061]", x, y1); // Parry
-    this.drawTextEx(this._entity.battler().cnt.toString(), x + 60, y1);
-    
-    x = Lecode.S_TBS.Windows.statusWindowSpriteBoxW;
-    y2 = y + this.lineHeight() - 8;
-    this.drawTextEx("\\i[1074]", x + 30, y2); // Defense
-    this.drawTextEx(this._entity.battler().pdr.toString(), x + 90, y2);
+    x2 = x1 + 120;
+    y2 = this.lineHeight() - 4;
+    this.drawTextEx("\\i[60]", x2, y2); // Spirit
+    this.drawTextEx(this._entity.battler().mdf.toString(), x2 + 32, y2);
     
     y2 += 32;
-    this.drawTextEx("\\i[1072]", x + 30, y2); // Mastery
-    this.drawTextEx(this._entity.battler().tcr.toString(), x + 90, y2);
+    this.drawTextEx("\\i[61]", x2, y2); // Agility
+    this.drawTextEx(this._entity.battler().agi.toString(), x2 + 32, y2);
     
     y2 += 32;
-    this.drawTextEx("\\i[1073]", x + 30, y2); // Skill Cost
-    this.drawTextEx(this._entity.battler().mcr.toString(), x + 90, y2);
+    this.drawTextEx("\\i[62]", x2, y2); // Move Cost
+    this.drawTextEx(this._entity.battler().luk.toString(), x2 + 32, y2);
     
-    y2 += 32;
-    this.drawTextEx("\\i[1075]", x + 30, y2); // HP Regen
-    this.drawTextEx(this._entity.battler().hrg.toString(), x + 90, y2);
+    x3 = x2 + 120;
+    y3 = this.lineHeight() - 4;
+    this.drawTextEx("\\i[1056]", x3, y3); // Hit
+    this.drawTextEx(this._entity.battler().hit.toString(), x3 + 32, y3);
     
-    y2 += 32;
-    this.drawTextEx("\\i[1076]", x + 30, y2); // MP Regen
-    this.drawTextEx(this._entity.battler().mrg.toString(), x + 90, y2);
+    y3 += 32;
+    this.drawTextEx("\\i[1058]", x3, y3); // Evade
+    this.drawTextEx(this._entity.battler().eva.toString(), x3 + 32, y3);
     
-    y2 += 32;
-    this.drawTextEx("\\i[1077]", x + 30, y2); // TP Regen
-    this.drawTextEx(this._entity.battler().trg.toString(), x + 90, y2);
+    y3 += 32;
+    this.drawTextEx("\\i[1061]", x3, y3); // Parry
+    this.drawTextEx(this._entity.battler().cnt.toString(), x3 + 32, y3);
+    
+    x4 = x3 + 120;
+    y4 = this.lineHeight() - 4;
+    this.drawTextEx("\\i[1075]", x4, y4); // HP Regen
+    this.drawTextEx(this._entity.battler().hrg.toString(), x4 + 32, y4);
+    
+    y4 += 32;
+    this.drawTextEx("\\i[1076]", x4, y4); // MP Regen
+    this.drawTextEx(this._entity.battler().mrg.toString(), x4 + 32, y4);
+    
+    y4 += 32;
+    this.drawTextEx("\\i[1077]", x4, y4); // TP Regen
+    this.drawTextEx(this._entity.battler().trg.toString(), x4 + 32, y4);
     //this.drawBasicInfo(this._entity.battler(), x, y);
 };
 //------------------------------------MAB Edits--------------------------------

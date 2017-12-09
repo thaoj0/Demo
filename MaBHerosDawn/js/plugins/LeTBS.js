@@ -7018,7 +7018,7 @@ TBSSequenceManager.prototype.commandEffects = function (param) {
     var animDelay = Number(param[3] || 0);
     var wait = String(param[4] || "false");
     wait = (wait === "true");
-
+    // MAB
     BattleManagerTBS.invokeObjEffects(this.getUser(), obj, targets, hitAnim, animDelay);
     this._affectedTargets = this._affectedTargets.concat(targets);
 
@@ -8731,6 +8731,7 @@ TBSEntity.prototype.checkMouseEvents = function () {
 };
 
 TBSEntity.prototype.isMouseOverMe = function () {
+    return false;
     var data = TouchInput._leTBSMoveData;
     return this._sprite.getBounds().contains(data.x, data.y);
 };
@@ -9415,6 +9416,7 @@ TBSEntity.prototype.attachWindow = function (win) {
         win.x = 0
     if ((win.x + win.width) > maxW)
         win.x = maxW - win.width;
+    
 };
 
 TBSEntity.prototype.battler = function () {
@@ -11945,6 +11947,7 @@ Game_Battler.prototype.setAttackedFrom = function(direction){
     this._attackedfrom = direction;
 }
 
+//baseDamage = this.itemBlock(target,baseDamage);
 Game_Action.prototype.itemBlock = function(target, value){ 
     if (this.isPhysical() && Math.random() < target.eva) {
         target.addTextPopup("Blocked");
@@ -12008,4 +12011,50 @@ BattleManagerTBS.processCounterAttack = function (targets, subject, action) {
             entity.executeAction(skill);
         }
     }.bind(this));
+};
+
+TBSEntity.prototype.attachWindow = function (win) {
+    /* MAB move attach */
+    var x = this._posX;// - win.windowWidth() / 2;
+    var y = this._posY - win.windowHeight();
+    win.x = x + this.width() / 2;
+    win.y = y;
+    var maxW = $gameMap.width() * $gameMap.tileWidth();
+    if (win.y < 0)
+        win.y = 0;
+    if (win.x < 0)
+        win.x = 0
+    if ((win.x + win.width) > maxW)
+        win.x = maxW - win.width;
+    
+};
+
+TBSEntity.prototype.onDeath = function () {
+    this._dead = true;
+    if (this.runningSequence() === "damaged")
+        this.appendSequence("dead");
+    else
+        this.startSequence("dead");
+    BattleManagerTBS.onEntityDeath(this);
+    
+    // MAB
+    
+    BattleManagerTBS.wait(60);
+    BattleManagerTBS.destroyEntity(this, true);
+    
+};
+
+BattleManagerTBS.invokeObjEffects = function (user, item, targets, hitAnim, animDelay) {
+    console.log("Pre-repeat:"+$gameVariables.value(1));
+    for(var i=0; i<=$gameVariables.value(1); i++){
+    this.activeAction().setItemObject(item);
+    this.prepareDirectionalDamageBonus(user, targets, item);
+    this.applyObjEffects(user, targets, hitAnim, animDelay);
+    this.dealObjTagEffects(user, targets);
+    this.resetDirectionalDamageBonus(targets);
+    this.refreshBattlersStatus();
+    }
+    
+    $gameVariables.setValue(1, 0);
+    console.log("Post-repeat:"+$gameVariables.value(1));
 };

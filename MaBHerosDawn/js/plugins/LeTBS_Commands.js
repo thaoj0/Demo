@@ -359,7 +359,7 @@ Window_TBSCommand.prototype.setup = function (actor, entity) {
 Window_TBSCommand.prototype.update = function () {
     Window_Command.prototype.update.call(this);
     if (this._entity) {
-        this._entity.attachWindow(this);
+        this._entity.attachWindow(this); // MAB this removes actor attachments
     }
 };
 
