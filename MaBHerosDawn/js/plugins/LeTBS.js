@@ -6787,6 +6787,7 @@ TBSSequenceManager.prototype.update = function () {
         return;
     }
     var command = this._sequence.table.shift();
+    console.log(command);
     if (command) {
         this.runCommand(command);
     } else
@@ -11864,7 +11865,7 @@ TBSEntity.prototype.getMovePoints = function () {
 };
 
 Game_BattlerBase.prototype.maxTp = function() {
-    return 20;
+    return this.agi;
 };
 
 Game_Battler.prototype.gainSilentTp = function(value) {
@@ -11883,7 +11884,8 @@ Game_Battler.prototype.chargeTpByDamage = function(damageRate) {
 //-------------------------------------------------------------------------
 
 Game_Action.prototype.itemCnt = function(target) {
-    if (target.canMove()) { // All attacks can be countered
+    console.log(target.attackedFrom()=="back");
+    if (target.canMove()) { // All attacks can be countered not from back
         return target.cnt;
     } else {
         return 0;
@@ -11947,14 +11949,14 @@ Game_Battler.prototype.setAttackedFrom = function(direction){
     this._attackedfrom = direction;
 }
 
-//baseDamage = this.itemBlock(target,baseDamage);
-Game_Action.prototype.itemBlock = function(target, value){ 
-    if (this.isPhysical() && Math.random() < target.eva) {
-        target.addTextPopup("Blocked");
-        target.startSequence("counter");   
+//baseDamage = this.itemBlock(target);
+Game_Action.prototype.itemBlock = function(target){ 
+    if (this.isPhysical() && target.attackedFrom()=="front" && Math.random() < target.cnt) {
+        //target.addTextPopup("Blocked");
+        //target.startSequence("counter");   
         return 0;
     } else {
-        return value;
+        return 1;
     }
 }
 
@@ -11996,7 +11998,7 @@ BattleManagerTBS.setAttackDirection = function (user, targets) {
 Game_BattlerBase.prototype.counterSkillId = function() {
     return 1;
 };
-
+/*
 BattleManagerTBS.processCounterAttack = function (targets, subject, action) {
     if (!action) return;
     this.setCursorCell(subject.getCell());
@@ -12012,7 +12014,7 @@ BattleManagerTBS.processCounterAttack = function (targets, subject, action) {
         }
     }.bind(this));
 };
-
+*/
 TBSEntity.prototype.attachWindow = function (win) {
     /* MAB move attach */
     var x = this._posX;// - win.windowWidth() / 2;
@@ -12045,7 +12047,7 @@ TBSEntity.prototype.onDeath = function () {
 };
 
 BattleManagerTBS.invokeObjEffects = function (user, item, targets, hitAnim, animDelay) {
-    console.log("Pre-repeat:"+$gameVariables.value(1));
+    //console.log("Pre-repeat:"+$gameVariables.value(1));
     for(var i=0; i<=$gameVariables.value(1); i++){
     this.activeAction().setItemObject(item);
     this.prepareDirectionalDamageBonus(user, targets, item);
@@ -12056,5 +12058,5 @@ BattleManagerTBS.invokeObjEffects = function (user, item, targets, hitAnim, anim
     }
     
     $gameVariables.setValue(1, 0);
-    console.log("Post-repeat:"+$gameVariables.value(1));
+    //console.log("Post-repeat:"+$gameVariables.value(1));
 };
