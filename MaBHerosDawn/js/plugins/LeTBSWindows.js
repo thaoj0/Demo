@@ -544,28 +544,34 @@ Window_TBSStatus.prototype.refresh = function () {
     x3 = x2 + 120;
     y3 = this.lineHeight() - 4;
     this.drawTextEx("\\i[1056]", x3, y3); // Hit
-    this.drawTextEx(this._entity.battler().hit.toString(), x3 + 32, y3);
+    this.drawGaugeBars(x3+32, y3, 6, this._entity.battler().hit, this.textColor(29), this.textColor(15));
+    //this.drawTextEx(this._entity.battler().hit.toString(), x3 + 32, y3);
     
     y3 += 32;
     this.drawTextEx("\\i[1058]", x3, y3); // Evade
-    this.drawTextEx(this._entity.battler().eva.toString(), x3 + 32, y3);
+    this.drawGaugeBars(x3+32, y3, 6, this._entity.battler().eva, this.textColor(29), this.textColor(15));
+    //this.drawTextEx(this._entity.battler().eva.toString(), x3 + 32, y3);
     
     y3 += 32;
     this.drawTextEx("\\i[1061]", x3, y3); // Parry
-    this.drawTextEx(this._entity.battler().cnt.toString(), x3 + 32, y3);
+    this.drawGaugeBars(x3+32, y3, 6, this._entity.battler().cnt, this.textColor(29), this.textColor(15));
+    //this.drawTextEx(this._entity.battler().cnt.toString(), x3 + 32, y3);
     
     x4 = x3 + 120;
     y4 = this.lineHeight() - 4;
     this.drawTextEx("\\i[1075]", x4, y4); // HP Regen
-    this.drawTextEx(this._entity.battler().hrg.toString(), x4 + 32, y4);
+    this.drawGaugeBars(x4+32, y4, 6, this._entity.battler().hrg*10, this.textColor(29), this.textColor(15));
+    //this.drawTextEx(this._entity.battler().hrg.toString(), x4 + 32, y4);
     
     y4 += 32;
     this.drawTextEx("\\i[1076]", x4, y4); // MP Regen
-    this.drawTextEx(this._entity.battler().mrg.toString(), x4 + 32, y4);
+    this.drawGaugeBars(x4+32, y4, 6, this._entity.battler().mrg*10, this.textColor(29), this.textColor(15));
+    //this.drawTextEx(this._entity.battler().mrg.toString(), x4 + 32, y4);
     
     y4 += 32;
     this.drawTextEx("\\i[1077]", x4, y4); // TP Regen
-    this.drawTextEx(this._entity.battler().trg.toString(), x4 + 32, y4);
+    this.drawGaugeBars(x4+32, y4, 6, this._entity.battler().trg*10, this.textColor(29), this.textColor(15));
+    //this.drawTextEx(this._entity.battler().trg.toString(), x4 + 32, y4);
     //this.drawBasicInfo(this._entity.battler(), x, y);
 };
 //------------------------------------MAB Edits--------------------------------
@@ -583,6 +589,16 @@ Window_Base.prototype.drawBasicInfo = function(actor, x, y) {
     this.drawActorIcons(actor, x, y + lineHeight * 1);
     this.drawActorHp(actor, x, y + lineHeight * 2);
     this.drawActorMp(actor, x, y + lineHeight * 3);
+};
+
+Window_Base.prototype.drawGaugeBars = function(x, y, width, rate, color1, color2) {
+    for(var i = 0; i < 5; i++){
+        if ( i < rate * 5){
+            this.drawGauge(x + i * 6, y, width, 1, color1, color1); 
+        }else{
+            this.drawGauge(x + i * 6, y, width, 1, color2, color2);     
+        }
+    }
 };
 //----------------------------------------------------------------------------
 Window_TBSStatus.prototype.drawSprite = function () {

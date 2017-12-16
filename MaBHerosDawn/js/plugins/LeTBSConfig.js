@@ -38,6 +38,15 @@ Lecode.S_TBS.Config.Battler_Sprites = {
         ["dead", "_dead", 1]
     ],
 
+    "Aurora": [
+        ["idle", "_idle", 1],
+        ["move", "_move", 4],
+        ["cast", "_cast", 3],
+        ["atk", "_atk", 4],
+        ["hit", "_hit", 1],
+        ["dead", "_dead", 1]
+    ],
+    
     "Rabbit": [
         ["idle", "_idle", 1],
         ["move", "_move", 3],
@@ -46,6 +55,15 @@ Lecode.S_TBS.Config.Battler_Sprites = {
         ["dead", "_dead", 1]
     ],
 
+    "Maxie": [
+        ["idle", "_idle", 1],
+        ["move", "_move", 3],
+        ["atk", "_atk", 3],
+        ["hit", "_hit", 1],
+        ["dead", "_dead", 1],
+        ["victory", "_victory", 5]
+    ],    
+    
     "Mago": [
         ["idle", "_idle", 1],
         ["move", "_move", 3],

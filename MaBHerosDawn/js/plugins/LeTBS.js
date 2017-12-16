@@ -6787,7 +6787,6 @@ TBSSequenceManager.prototype.update = function () {
         return;
     }
     var command = this._sequence.table.shift();
-    console.log(command);
     if (command) {
         this.runCommand(command);
     } else
@@ -8732,7 +8731,7 @@ TBSEntity.prototype.checkMouseEvents = function () {
 };
 
 TBSEntity.prototype.isMouseOverMe = function () {
-    return false;
+    return false; // MAB Mouse never over
     var data = TouchInput._leTBSMoveData;
     return this._sprite.getBounds().contains(data.x, data.y);
 };
@@ -11864,21 +11863,94 @@ TBSEntity.prototype.getMovePoints = function () {
     //return this._movePoints.clamp(0, this._movePoints);
 };
 
+//-------------------------------------------------------------------------
+// MAB Edits Regeneration
+//-------------------------------------------------------------------------
+TBSSequenceManager.prototype.update = function () {
+    if (!this.isRunning()) return;
+    this._command.update();
+    var canContinue = !this._command.waitWhile();
+    if (canContinue) {
+        this._command.onEnd();
+        //this._index++;
+    } else {
+        return;
+    }
+    var command = this._sequence.table.shift();
+    //console.log(command);
+    if (command) {
+        this.runCommand(command);
+    } else
+        this.endOfSequence();
+};
+
+BattleManagerTBS.onTurnOrderEnd = function () {
+    $gameTroop.increaseTurn();
+    this.executeEventsWhen("turn_order_end");
+    BattleManagerTBS.determineTurnOrder();
+};
+
+BattleManagerTBS.determineTurnOrderSimple = function () {
+    var array = [];
+    this._turnOrder = [];
+    this._activeIndex = 0;
+
+    this.allPlayableEntities().forEach(function (entity) {
+        array.push(entity);
+    });
+    array = array.sort(function (a, b) {
+        return b._battler.tp - a._battler.tp;
+    });
+
+    this._turnOrder = array;
+    this._turnOrderVisual.set(this._turnOrder);
+};
+
 Game_BattlerBase.prototype.maxTp = function() {
     return this.agi;
 };
 
 Game_Battler.prototype.gainSilentTp = function(value) {
     this.setTp(this.tp + value);
+    //console.log( this+"::"+this.tp+"/"+this.maxTp() );
 };
 
 Game_Battler.prototype.initTp = function() {
-    this.setTp(10);
+    this.setTp(Math.floor(this.agi/2));
 };
 
 Game_Battler.prototype.chargeTpByDamage = function(damageRate) {
 };
 
+Game_Battler.prototype.regenerateHp = function() {
+    //var value = Math.floor(this.mhp * this.hrg);
+    var value = Math.floor(100 * this.hrg);
+    value = Math.max(value, -this.maxSlipDamage());
+    if (value !== 0) {
+        this.gainHp(value);
+    }
+};
+
+Game_Battler.prototype.regenerateMp = function() {
+    //var value = Math.floor(this.mmp * this.mrg);
+    var value = Math.floor(100 * this.mrg);
+    if (value !== 0) {
+        this.gainMp(value);
+    }
+};
+
+Game_Battler.prototype.regenerateTp = function() {
+    var value = Math.floor(100 * this.trg);
+    this.gainSilentTp(value);
+};
+
+Game_Battler.prototype.regenerateAll = function() {
+    if (this.isAlive()) {
+        this.regenerateHp();
+        this.regenerateMp();
+        this.regenerateTp();
+    }
+};
 //-------------------------------------------------------------------------
 // MAB's Edits: (Hit - Evade = Dodge) (Evade - Hit = Critical)
 //-------------------------------------------------------------------------
