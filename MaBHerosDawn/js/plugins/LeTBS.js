@@ -3477,6 +3477,7 @@ BattleManagerTBS.onPrimarySequenceEnd = function (seqMng) {
 };
 
 BattleManagerTBS.processCounterAttack = function (targets, subject, action) {
+    console.log("Countered");
     if (!action) return;
     this.setCursorCell(subject.getCell());
     targets.forEach(function (entity) {
