@@ -8732,7 +8732,7 @@ TBSEntity.prototype.checkMouseEvents = function () {
 };
 
 TBSEntity.prototype.isMouseOverMe = function () {
-    return false; // MAB Mouse never over
+    //return false; // MAB Mouse never over
     var data = TouchInput._leTBSMoveData;
     return this._sprite.getBounds().contains(data.x, data.y);
 };
@@ -12112,8 +12112,9 @@ TBSEntity.prototype.onDeath = function () {
         this.startSequence("dead");
     BattleManagerTBS.onEntityDeath(this);
     
-    // MAB
+    // MAB This removes the miniHud and destory the entity on death
     
+    this.hideMiniHud();
     BattleManagerTBS.wait(60);
     BattleManagerTBS.destroyEntity(this, true);
     
