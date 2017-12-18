@@ -7992,7 +7992,7 @@ TBSSequenceManager.prototype.endOfSequence = function () {
     if (data) {
         this.start(data[0], data[1], data[2]);
         this.update();
-    } else {
+    //} else {
         BattleManagerTBS.onPrimarySequenceEnd(this);
         this._affectedTargets = [];
     }
