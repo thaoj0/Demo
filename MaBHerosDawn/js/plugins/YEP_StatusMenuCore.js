@@ -1443,3 +1443,9 @@ if (!Yanfly.Util.toGroup) {
 //=============================================================================
 // End of File
 //=============================================================================
+Window_StatusInfo.prototype.drawAttributeRate = function(rate, dx, dy, dw) {
+    this.drawGaugeBars(dx + dw - 30 - this.textPadding(), dy, 6, rate*10, this.textColor(29), this.textColor(15));
+    var value = (rate * 100).toFixed(Yanfly.Param.StatusAttrDec) + '%';
+    this.setRateColor(rate);
+    this.drawAttributeValue(value, dx, dy, dw);
+};

@@ -2203,8 +2203,10 @@ BattleManagerTBS.processPositioningPhase = function () {
     this.allyStartCells().forEach(function (cell) {
         if (cell._positioningData.type === "actor") {
             var id = cell._positioningData.fixed;
-            if (id)
-                this._actorsToPositionate.push($gameActors.actor(id));
+            if (id){
+                //this._actorsToPositionate.push($gameParty.battleMembers()[id]);
+                this._actorsToPositionate.push($gameActors.actor(id)); //MAB
+           }
         }
     }.bind(this));
     this.processActorsPrePositioning();
@@ -2353,7 +2355,8 @@ BattleManagerTBS.processActorsPrePositioning = function () {
     do {
         var actor = this._actorsToPositionate.shift();
         var cell = this.allyStartCells().filter(function (cell) {
-            return cell._positioningData.fixed === actor.actorId();
+            //return cell._positioningData.fixed === actor.index();
+            return cell._positioningData.fixed === actor.actorId(); // MAB
         })[0];
         var entity = new TBSEntity(actor, this.getLayer("battlers"));
         entity.setCell(cell);

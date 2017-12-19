@@ -1994,12 +1994,13 @@ Scene_Skill.prototype.onEqsItemCancel = function() {
 Moogle_X.EQS.Window_SkillType_makeCommandList =
     Window_SkillType.prototype.makeCommandList;
 Window_SkillType.prototype.makeCommandList = function() {
-    Moogle_X.EQS.Window_SkillType_makeCommandList.call(this);
+    // MAB
     if (this._actor) {
         if (!this._actor.isEqsHide() && this.eqsShowCommand()) {
             this.addCommand(Moogle_X.EQS.eqsVocab, 'eqsEquip', true);
         }
     }
+    Moogle_X.EQS.Window_SkillType_makeCommandList.call(this);
 };
 
 Window_SkillType.prototype.eqsShowCommand = function() {
@@ -2704,3 +2705,4 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 //=============================================================================
 // End of File
 //=============================================================================
+

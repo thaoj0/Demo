@@ -1151,3 +1151,13 @@ Yanfly.Util.displayError = function(e, code, message) {
 //=============================================================================
 // End of File
 //=============================================================================
+Yanfly.Equip.Window_EquipCommand_makeCommandList =
+    Window_EquipCommand.prototype.makeCommandList;
+Window_EquipCommand.prototype.makeCommandList = function() {
+    //Yanfly.Equip.Window_EquipCommand_makeCommandList.call(this);
+    this.addCommand(TextManager.equip2,   'equip');
+    //this.addCommand(TextManager.optimize, 'optimize');
+    this.addCommand(TextManager.clear,    'clear');
+    this.addCustomCommand();
+    this.addFinishCommand();
+};
