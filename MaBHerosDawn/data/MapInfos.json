@@ -5,6 +5,6 @@ null,
 {"id":3,"expanded":false,"name":"Neutral Entity Example","order":6,"parentId":0,"scrollX":724.6666666666666,"scrollY":459.3333333333333},
 {"id":4,"expanded":false,"name":"Basic Map 2","order":3,"parentId":2,"scrollX":721.3333333333334,"scrollY":461.3333333333333},
 {"id":5,"expanded":false,"name":"TBS Events Example 2","order":5,"parentId":1,"scrollX":542.6666666666666,"scrollY":461.3333333333333},
-{"id":6,"expanded":false,"name":"Start","order":1,"parentId":0,"scrollX":531.2,"scrollY":452.4},
-{"id":7,"expanded":false,"name":"MAP007","order":7,"parentId":0,"scrollX":523.3333333333334,"scrollY":470}
+{"id":6,"expanded":false,"name":"Start","order":1,"parentId":0,"scrollX":614.4,"scrollY":452.4},
+{"id":7,"expanded":false,"name":"MAP007","order":7,"parentId":0,"scrollX":614.4,"scrollY":458.8}
 ]

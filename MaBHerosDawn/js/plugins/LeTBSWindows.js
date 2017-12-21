@@ -528,7 +528,8 @@ Window_TBSStatus.prototype.refresh = function () {
     this.drawTextEx("\\i[59]", x1, y1); // Support
     this.drawTextEx(this._entity.battler().mat.toString(), x1 + 32, y1);
     
-    x2 = x1 + 120;
+    xpart = 76;
+    x2 = x1 + xpart;
     y2 = this.lineHeight() - 4;
     this.drawTextEx("\\i[60]", x2, y2); // Spirit
     this.drawTextEx(this._entity.battler().mdf.toString(), x2 + 32, y2);
@@ -541,7 +542,7 @@ Window_TBSStatus.prototype.refresh = function () {
     this.drawTextEx("\\i[62]", x2, y2); // Move Cost
     this.drawTextEx(this._entity.battler().luk.toString(), x2 + 32, y2);
     
-    x3 = x2 + 120;
+    x3 = x2 + xpart;
     y3 = this.lineHeight() - 4;
     this.drawTextEx("\\i[1056]", x3, y3); // Hit
     this.drawGaugeBars(x3+32, y3, 6, this._entity.battler().hit, this.textColor(29), this.textColor(15));
@@ -557,7 +558,7 @@ Window_TBSStatus.prototype.refresh = function () {
     this.drawGaugeBars(x3+32, y3, 6, this._entity.battler().cnt, this.textColor(29), this.textColor(15));
     //this.drawTextEx(this._entity.battler().cnt.toString(), x3 + 32, y3);
     
-    x4 = x3 + 120;
+    x4 = x3 + xpart;
     y4 = this.lineHeight() - 4;
     this.drawTextEx("\\i[1075]", x4, y4); // HP Regen
     this.drawGaugeBars(x4+32, y4, 6, this._entity.battler().hrg*10, this.textColor(29), this.textColor(15));
@@ -592,6 +593,7 @@ Window_Base.prototype.drawBasicInfo = function(actor, x, y) {
 };
 
 Window_Base.prototype.drawGaugeBars = function(x, y, width, rate, color1, color2) {
+    this._gaugeHeight = 24;
     for(var i = 0; i < 5; i++){
         if ( i < rate * 5){
             this.drawGauge(x + i * 6, y, width, 1, color1, color1); 
