@@ -1059,6 +1059,19 @@ Window_PartyList.prototype.initialize = function(partyWindow) {;
     this.refresh();
 };
 
+
+Window_PartyList.prototype.activate = function() {
+    Window_Base.prototype.activate.call(this);
+    this.reselect();
+    this.show();
+};
+
+Window_PartyList.prototype.deactivate = function() {
+    Window_Base.prototype.deactivate.call(this);
+    this.reselect();
+    this.hide();
+};
+
 Window_PartyList.prototype.windowWidth = function() {
     if (this._detailedWindow) {
       return Yanfly.Param.PartyListWidth;

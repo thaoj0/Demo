@@ -2279,10 +2279,22 @@ Window_EquipSkillPool.prototype.costWidth = function() {
 };
 
 Window_EquipSkillPool.prototype.drawEquipCost = function(skill, x, y, width) {
-    this.changeTextColor(this.textColor(Moogle_X.EQS.eqsCostNumberColor));
-    if (skill.eqsCost > 0) {
-        this.drawText(skill.eqsCost, x, y, width, 'right');
+    //this.changeTextColor(this.textColor(Moogle_X.EQS.eqsCostNumberColor));
+    //if (skill.eqsCost > 0) {
+    //    this.drawText(skill.eqsCost, x, y, width, 'right');
+    //}
+    
+    if (this._actor.skillTpCost(skill) > 0) {
+        this.changeTextColor(this.tpCostColor());
+        var skillcost = Yanfly.Util.toGroup(this._actor.skillTpCost(skill));
+        this.drawText(skillcost, x, y, width, 'right');
+    } 
+    if (this._actor.skillMpCost(skill) > 0) {
+        this.changeTextColor(this.mpCostColor());
+        var skillcost = Yanfly.Util.toGroup(this._actor.skillMpCost(skill));
+        this.drawText(skillcost, x, y, width, 'right');
     }
+    
 };
 
 Window_EquipSkillPool.prototype.updateHelp = function() {
@@ -2350,8 +2362,8 @@ Window_EqsLimit.prototype.drawCurrentEqsLimit = function() {
         this.changePaintOpacity(true);
         this.drawText(Moogle_X.EQS.limitText, rect.x, rect.y, rect.width);
         this.changeTextColor(this.textColor(Moogle_X.EQS.limitNumberColor))
-        var text = this._actor.currentEqsLimit() + "/" + this._actor._eqsMaxLimit;
-        this.drawText(text, wx, rect.y, rect.width - wx, 'right');
+        //var text = this._actor.currentEqsLimit() + "/" + this._actor._eqsMaxLimit;
+        //this.drawText(text, wx, rect.y, rect.width - wx, 'right');
     }
 };
 
