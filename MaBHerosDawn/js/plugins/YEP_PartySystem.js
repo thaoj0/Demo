@@ -664,6 +664,11 @@ Game_Party.prototype.lockActor = function(actorId) {
     if (actor) actor._locked = true;
 };
 
+Game_Party.prototype.unlockActor = function(actorId) {
+    var actor = $gameActors.actor(actorId);
+    if (actor) actor._locked = false;
+};
+
 Game_Party.prototype.reconstructActions = function(actorId) {
     for (var i = 0; i < this.members().length; ++i) {
       var member = this.members()[i];
@@ -813,6 +818,8 @@ Window_PartyMenuCommand.prototype.makeCommandList = function() {
 Window_PartyMenuCommand.prototype.addChangeCommand = function() {
     if (Yanfly.Param.PartyCommand1 === '') return;
     this.addCommand(Yanfly.Param.PartyCommand1, 'change');
+    this.addCommand("Skill", 'skill');
+    this.addCommand("Equipment", 'equip');
 };
 
 Window_PartyMenuCommand.prototype.addRemoveCommand = function() {
@@ -1703,6 +1710,8 @@ Scene_Party.prototype.createCommandWindow = function() {
     this._commandWindow = new Window_PartyMenuCommand(0, 0);
     if (this._helpWindow) this._commandWindow.y = this._helpWindow.height;
     this._commandWindow.setHandler('change', this.commandAdjust.bind(this));
+    this._commandWindow.setHandler('skill', this.commandAdjust.bind(this));
+    this._commandWindow.setHandler('equip', this.commandAdjust.bind(this));
     this._commandWindow.setHandler('remove', this.commandAdjust.bind(this));
     this._commandWindow.setHandler('revert', this.commandRevert.bind(this));
     this._commandWindow.setHandler('cancel', this.commandFinish.bind(this));
@@ -1781,6 +1790,16 @@ Scene_Party.prototype.onPartyOk = function() {
       $gameParty._battleMembers[index] = 0
       this.refreshWindows();
       this._partyWindow.activate();
+    } else if (symbol === 'skill') { // MAB
+        var index = this._partyWindow._index;
+        var actor = $gameActors.actor($gameParty._battleMembers[index]);
+        $gameParty.setMenuActor(actor);
+        SceneManager.push(Scene_Skill);
+    } else if (symbol === 'equip') { // MAB
+        var index = this._partyWindow._index;
+        var actor = $gameActors.actor($gameParty._battleMembers[index]);
+        $gameParty.setMenuActor(actor);
+        SceneManager.push(Scene_Equip);
     }
 };
 
