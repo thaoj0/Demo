@@ -1361,6 +1361,7 @@ Window_PartyDetail.prototype.calculateAvailableLines = function() {
 
 Window_PartyDetail.prototype.drawActorParams = function() {
     this.drawActorParamsTitle();
+    arrayname = ["\\I[57]","\\I[58]","\\I[59]","\\I[60]","\\I[61]","\\I[62]"];
     for (var i = 0; i < 6; ++i) {
       var rect = this.paramRect(i);
       if (this._linesAvailable > 4) {
@@ -1373,7 +1374,8 @@ Window_PartyDetail.prototype.drawActorParams = function() {
       var paramId = i + 2;
       var text = TextManager.param(paramId);
       this.changeTextColor(this.systemColor());
-      this.drawText(text, rect.x, rect.y, rect.width);
+      //this.drawText(text, rect.x, rect.y, rect.width);
+      this.drawTextEx(arrayname[i] + text, rect.x, rect.y, rect.width);
       var paramValue = Yanfly.Util.toGroup(this._actor.param(paramId));
       this.changeTextColor(this.normalColor());
       this.drawText(paramValue, rect.x, rect.y, rect.width, 'right');
@@ -1396,8 +1398,31 @@ Window_PartyDetail.prototype.drawActorParamsTitle = function() {
 
 Window_PartyDetail.prototype.drawActorEquips = function() {
     this.drawActorEquipsTitle();
-    var equips = this.getActorEquips();
-    this.drawActorEquipsList(equips);
+    arrayname = ["\\I[1056]Hit","\\I[1058]Evade","\\I[1061]Parry","\\I[1075]HP Regen","\\I[1076]MP Regen","\\I[1077]TP Regen"];
+    arrayvalue = [this._actor.hit*0.1,this._actor.eva*0.1,this._actor.cnt*0.1,this._actor.hrg,this._actor.mrg,this._actor.trg];
+    for (var i = 0; i < 6; ++i) {
+      var rect = this.paramRect(i);
+      if (this._linesAvailable > 4) {
+        rect.x += this.lineHeight() * 7;
+        rect.width -= 24;//this.contents.width;
+      } else {
+        rect.x += this.lineHeight() * 8;
+        rect.width -= this.contents.width * 2;
+      }
+      var paramId = i + 2;
+      var text = TextManager.param(paramId);
+      this.changeTextColor(this.systemColor());
+      //this.drawText(text, rect.x, rect.y, rect.width);
+      this.drawTextEx(arrayname[i], rect.x, rect.y, rect.width);
+      var paramValue = Yanfly.Util.toGroup(this._actor.param(paramId));
+      this.changeTextColor(this.normalColor());
+      //this.drawText(paramValue, rect.x, rect.y, rect.width, 'right');
+      this.drawTextEx(arrayvalue[i].toString(), rect.x + rect.width - 24, rect.y, rect.width);
+      this.drawGaugeBars(rect.x + rect.width - 24, rect.y, 6, arrayvalue[i]*10, this.textColor(29), this.textColor(15));
+    }
+    
+    //var equips = this.getActorEquips();
+    //this.drawActorEquipsList(equips);
 };
 
 Window_PartyDetail.prototype.drawActorEquipsTitle = function() {
