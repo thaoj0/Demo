@@ -452,8 +452,14 @@ Lecode.S_TBS.Config.Custom_Scopes = {
 
     "ice_prison": {
         data: "[cx-1,cy-1],[cx,cy-1],[cx+1,cy-1],[cx-1,cy],[cx+1,cy],[cx-1,cy+1],[cx,cy+1],[cx+1,cy+1]"
-    }
+    },
 
+    "lunge": {
+        data_right: "[cx,cy],[cx+1,cy]",
+        data_left: "[cx-1,cy],[cx,cy]",
+        data_up: "[cx,cy-1],[cx,cy]",
+        data_down: "[cx,cy],[cx,cy+1]"
+    }
 };
 
 /*-------------------------------------------------------------------------

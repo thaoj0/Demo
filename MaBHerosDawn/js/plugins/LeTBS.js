@@ -12133,7 +12133,17 @@ BattleManagerTBS.invokeObjEffects = function (user, item, targets, hitAnim, anim
     this.resetDirectionalDamageBonus(targets);
     this.refreshBattlersStatus();
   }
-    
+    for (var i = 0; i < targets.length; i++) {
+        var entity = targets[i];
+        if (entity.battler().isStateAffected(40)){
+            entity.forcePush(user, user.getCell(), 1, item, false);
+            entity.battler().eraseState(40);
+        }
+        if (entity.battler().isStateAffected(41)){
+            entity.forcePush(user, user.getCell(), -1, item, false);
+            entity.battler().eraseState(41);
+        }
+    }
     $gameVariables.setValue(1, 0); // Reset to 0
     //console.log("Post-repeat:"+$gameVariables.value(1));
 };
