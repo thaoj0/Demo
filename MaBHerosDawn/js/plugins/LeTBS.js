@@ -12124,16 +12124,16 @@ TBSEntity.prototype.onDeath = function () {
 };
 
 BattleManagerTBS.invokeObjEffects = function (user, item, targets, hitAnim, animDelay) {
-    //console.log("Pre-repeat:"+$gameVariables.value(1));
-    for(var i=0; i<=$gameVariables.value(1); i++){
+    //console.log("Pre-repeat:"+$gameVariables.value(1)); // MAB this allows repeat hits
+  for(var i=0; i<=Math.floor($gameVariables.value(1)); i++){ // First hit always plays with i = 0
     this.activeAction().setItemObject(item);
     this.prepareDirectionalDamageBonus(user, targets, item);
     this.applyObjEffects(user, targets, hitAnim, animDelay);
     this.dealObjTagEffects(user, targets);
     this.resetDirectionalDamageBonus(targets);
     this.refreshBattlersStatus();
-    }
+  }
     
-    $gameVariables.setValue(1, 0);
+    $gameVariables.setValue(1, 0); // Reset to 0
     //console.log("Post-repeat:"+$gameVariables.value(1));
 };
